@@ -1,4 +1,3 @@
-import { Stylesheet } from 'css';
 import { NodeType } from '../src/node/node-type';
 
 export interface IAttr {
@@ -28,6 +27,7 @@ export interface INode {
 	insertBefore(childNode: INode, previousTarget: INode): void;
 	replaceChild(childNode: INode, ...children: INode[]): void;
 	removeChild(childNode: INode): void;
+	remove(): void;
 
 	hasAttribute(name: string, namespace?: string): boolean;
 	getAttribute(name: string, namespace?: string): string | null;
@@ -40,18 +40,22 @@ export interface INode {
 	querySelectorAll(selector: string | NodeType | TCheckFn): INode[];
 }
 
-export interface ITagNode extends INode {
+export interface ITag extends INode {
+	nodeType: NodeType.Tag;
 	childNodes: INode[];
 	attributes: IAttr[];
-	cloneNode(): ITagNode;
+	cloneNode(): ITag;
 }
 
-export interface IDomNode extends ITagNode {
-	stylesheet?: Stylesheet;
-	styletag?: ITagNode;
+export interface IDocument extends INode {
+	nodeType: NodeType.Document;
+	childNodes: INode[];
+	attributes: IAttr[];
+	cloneNode(): IDocument;
 }
 
-export interface ITextNode extends INode {
+export interface IText extends INode {
+	nodeType: NodeType.Text | NodeType.CDATA | NodeType.Comments;
 	childNodes: undefined;
 	attributes: undefined;
 	textContent: string;

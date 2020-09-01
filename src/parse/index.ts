@@ -1,10 +1,10 @@
 import { IDynamicObj } from '../../typings';
-import { IDomNode } from '../../typings/node';
+import { IDocument } from '../../typings/node';
 import { Node } from '../node';
 import { NodeType } from '../node/node-type';
 import { collapseQuots } from '../utils/collapse-quots';
 import { mixWhiteSpace } from '../utils/mix-white-space';
-import { REG_ATTR, REG_CDATA_SECT, REG_COMMENTS, REG_DOCTYPE, REG_END_TAG, REG_OTHER_DECL, REG_OTHER_SECT, REG_START_TAG, REG_XML_DECL } from './regs';
+import { REG_ATTR, REG_CDATA_SECT, REG_COMMENTS, REG_DOCTYPE, REG_END_TAG, REG_START_TAG, REG_XML_DECL } from './regs';
 
 interface IStatus {
 	line: number;
@@ -17,13 +17,11 @@ interface ICurrent {
 	lastIndex: number;
 }
 
-const configs: Array<[number, string, RegExp, number] | [number, RegExp, number]> = [
-	[1, 'xml-decl', REG_XML_DECL, NodeType.XMLDecl],
-	[1, 'cdata', REG_CDATA_SECT, NodeType.CDATA],
-	[2, REG_OTHER_SECT, NodeType.OtherSect],
-	[1, 'doctype', REG_DOCTYPE, NodeType.DocType],
-	[2, REG_OTHER_DECL, NodeType.OtherDecl],
-	[1, 'comments', REG_COMMENTS, NodeType.Comments],
+const configs: Array<[string, RegExp, number]> = [
+	['xml-decl', REG_XML_DECL, NodeType.XMLDecl],
+	['cdata', REG_CDATA_SECT, NodeType.CDATA],
+	['doctype', REG_DOCTYPE, NodeType.DocType],
+	['comments', REG_COMMENTS, NodeType.Comments],
 ];
 
 const updStatus = (pos: number, str: string, status: IStatus) => {
@@ -40,36 +38,15 @@ const updStatus = (pos: number, str: string, status: IStatus) => {
 	}
 };
 
-// 应对一个捕获组的状况
-const Process1 = (conf: [number, string, RegExp, number], str: string, lastIndex: number): ICurrent | null => {
-	const reg = conf[2];
+const ProcessTagLess = ([name, reg, type]: typeof configs[0], str: string, lastIndex: number): ICurrent | null => {
 	reg.lastIndex = lastIndex;
 	const execResult = reg.exec(str);
 	if (execResult && execResult.index === lastIndex) {
 		return {
 			node: new Node({
-				nodeType: conf[3],
-				nodeName: `#${conf[1]}`,
-				textContent: execResult[1],
-			}),
-			lastIndex: reg.lastIndex,
-		};
-	}
-	return null;
-};
-
-
-// 应对两个捕获组的状况
-const Process2 = (conf: [number, RegExp, number], str: string, lastIndex: number): ICurrent | null => {
-	const reg = conf[1];
-	reg.lastIndex = lastIndex;
-	const execResult = reg.exec(str);
-	if (execResult && execResult.index === lastIndex) {
-		return {
-			node: new Node({
-				nodeType: conf[2],
-				nodeName: `#${execResult[1].toLowerCase()}`,
-				textContent: execResult[2],
+				nodeType: type,
+				nodeName: `#${name}`,
+				textContent: execResult[0],
 			}),
 			lastIndex: reg.lastIndex,
 		};
@@ -97,7 +74,7 @@ const ProcessTag = (str: string, status: IStatus, lastIndex: number): ICurrent |
 		if (execResult[1].includes(':')) {
 			const tagName = execResult[1].split(':');
 			if (tagName.length !== 2 || !tagName[0] || !tagName[1]) {
-				throw new Error(`Wrong start tag! at ${status.line}:${status.pos}`);
+				throw new Error(`Wrong start tag! At ${status.line}:${status.pos}`);
 			} else {
 				result.node.nodeName = tagName[1];
 				result.node.namespace = tagName[0];
@@ -116,7 +93,7 @@ const ProcessTag = (str: string, status: IStatus, lastIndex: number): ICurrent |
 
 			// 属性名排重
 			if (attrUnique[attrExec[1]]) {
-				throw new Error(`Duplicate property names! at ${tempStatus.line}:${tempStatus.pos}`);
+				throw new Error(`Duplicate property names! At ${tempStatus.line}:${tempStatus.pos}`);
 			}
 			attrUnique[attrExec[1]] = true;
 
@@ -125,7 +102,7 @@ const ProcessTag = (str: string, status: IStatus, lastIndex: number): ICurrent |
 				if (attrName.length === 2 && attrName[0] && attrName[1]) {
 					result.node.setAttribute(attrName[1], collapseQuots(attrExec[2]).trim(), attrName[0]);
 				} else {
-					throw new Error(`Wrong attribute name! at ${tempStatus.line + status.line - 1}:${tempStatus.line > 1 ? tempStatus.pos : status.pos + tempStatus.pos}`);
+					throw new Error(`Wrong attribute name! At ${tempStatus.line + status.line - 1}:${tempStatus.line > 1 ? tempStatus.pos : status.pos + tempStatus.pos}`);
 				}
 			} else {
 				result.node.setAttribute(attrExec[1], collapseQuots(attrExec[2]).trim());
@@ -154,7 +131,7 @@ const ProcessEndTag = (str: string, status: IStatus, lastIndex: number): ICurren
 		if (execResult[1].includes(':')) {
 			const tagName = execResult[1].split(':');
 			if (tagName.length !== 2 || !tagName[1] || !tagName[0]) {
-				throw new Error(`Wrong end tag! at ${status.line}:${status.pos}`);
+				throw new Error(`Wrong end tag! At ${status.line}:${status.pos}`);
 			} else {
 				result.node.nodeName = tagName[1];
 				result.node.namespace = tagName[0];
@@ -174,16 +151,9 @@ const parseNode = (str: string, status: IStatus, lastIndex: number): ICurrent =>
 		if (ltExec.index === lastIndex) { // 以 < 开始的情况都按节点处理
 
 			for (const cfg of configs) {
-				if (cfg[0] === 1) {
-					const processResult1 = Process1(cfg as [number, string, RegExp, number], str, lastIndex);
-					if (processResult1) {
-						return processResult1;
-					}
-				} else {
-					const processResult2 = Process2(cfg as [number, RegExp, number], str, lastIndex);
-					if (processResult2) {
-						return processResult2;
-					}
+				const processResult1 = ProcessTagLess(cfg, str, lastIndex);
+				if (processResult1) {
+					return processResult1;
 				}
 			}
 
@@ -196,7 +166,7 @@ const parseNode = (str: string, status: IStatus, lastIndex: number): ICurrent =>
 			if (processEndTag) {
 				return processEndTag;
 			}
-			throw new Error(`Failed to parse tags! at ${status.line}:${status.pos}`);
+			throw new Error(`Failed to parse nodes! At ${status.line}:${status.pos}`);
 
 		} else { // 非 < 开始的都按文本处理
 
@@ -221,12 +191,12 @@ const parseNode = (str: string, status: IStatus, lastIndex: number): ICurrent =>
 	}
 };
 
-export const parse = async (str: string): Promise<IDomNode> => {
+export const parse = async (str: string): Promise<IDocument> => {
 	return new Promise((resolve, reject) => {
 		const doc = new Node({
 			nodeType: NodeType.Document,
 			nodeName: '#document',
-		}) as IDomNode;
+		}) as IDocument;
 		const stack: Node[] = [];
 		const status: IStatus = {
 			line: 1,
@@ -239,7 +209,7 @@ export const parse = async (str: string): Promise<IDomNode> => {
 		let hasRoot = false;
 		const firstIndex = str.indexOf('<');
 		if (firstIndex > 0 && !/^\s+</.test(str)) {
-			reject(new Error(`Unexpected text node! at ${status.line}:${status.pos}`));
+			reject(new Error(`Unexpected text node! At ${status.line}:${status.pos}`));
 			return;
 		}
 		try {
@@ -249,7 +219,7 @@ export const parse = async (str: string): Promise<IDomNode> => {
 			return;
 		}
 		if (current.node.nodeType === NodeType.XMLDecl && firstIndex > 0) {
-			reject(new Error(`The xml declaration must be at the front of the document! at ${status.line}:${status.pos}`));
+			reject(new Error(`The xml declaration must be At the front of the document! At ${status.line}:${status.pos}`));
 			return;
 		}
 		doc.appendChild(current.node);
@@ -285,12 +255,12 @@ export const parse = async (str: string): Promise<IDomNode> => {
 						}
 						stack.pop();
 					} else {
-						reject(new Error(`The start and end tags cannot match! at ${status.line}:${status.pos}`));
+						reject(new Error(`The start and end tags cannot match! At ${status.line}:${status.pos}`));
 						return;
 					}
 				} else {
 					// 没有开始标签而出现了结束标签
-					reject(new Error(`Unexpected end tag! at ${status.line}:${status.pos}`));
+					reject(new Error(`Unexpected end tag! At ${status.line}:${status.pos}`));
 					return;
 				}
 
@@ -304,7 +274,7 @@ export const parse = async (str: string): Promise<IDomNode> => {
 				} else if (current.node.nodeType === NodeType.Text || current.node.nodeType === NodeType.CDATA) {
 					// 没有节点而出现了非空文本节点
 					if ((current.node.textContent as string).replace(/\s/g, '')) {
-						reject(new Error(`Unexpected text node! at ${status.line}:${status.pos}`));
+						reject(new Error(`Unexpected text node! At ${status.line}:${status.pos}`));
 						return;
 					}
 				} else {
@@ -315,7 +285,7 @@ export const parse = async (str: string): Promise<IDomNode> => {
 				if (current.node.nodeType === NodeType.Tag) {
 					if (!stackLen) {
 						if (hasRoot) {
-							reject(new Error(`Only one root element node is allowed! at ${status.line}:${status.pos}`));
+							reject(new Error(`Only one root element node is allowed! At ${status.line}:${status.pos}`));
 							return;
 						}
 						hasRoot = true;
@@ -333,12 +303,12 @@ export const parse = async (str: string): Promise<IDomNode> => {
 		}
 
 		if (stack.length) {
-			reject(new Error(`Document structure is wrong! at ${status.line}:${status.pos}`));
+			reject(new Error(`Document structure is wrong! At ${status.line}:${status.pos}`));
 			return;
 		}
 
 		if (!hasRoot) {
-			reject(new Error(`No root element node! at ${status.line}:${status.pos}`));
+			reject(new Error(`No root element node! At ${status.line}:${status.pos}`));
 			return;
 		}
 

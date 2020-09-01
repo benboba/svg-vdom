@@ -7,8 +7,6 @@ export enum NodeType {
 	Tag = 1,
 	Text = 3,
 	CDATA = 4,
-	OtherSect = 5,
-	OtherDecl = 6,
 	XMLDecl = 7,
 	Comments = 8,
 	Document = 9,

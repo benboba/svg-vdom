@@ -1,8 +1,6 @@
-import { stringify as cssStringify } from 'css';
 import { IDomNode, INode, ITagNode } from '../../typings/node';
 import { NodeType } from '../node/node-type';
 import { mixWhiteSpace } from '../utils/mix-white-space';
-import { shortenTag } from '../utils/shorten-tag';
 
 export const stringifyNode = (node: INode): string => {
 	let xml = '';
@@ -64,25 +62,6 @@ export const stringifyTag = (node: ITagNode): string => {
 };
 
 export const stringifyXML = (dom?: IDomNode | null): string => {
-	if (!dom) {
-		return '';
-	}
-
-	let result = '';
-	if (dom.stylesheet) {
-		const cssText = shortenTag(cssStringify(dom.stylesheet, { compress: true }));
-		const styletag = dom.styletag as ITagNode;
-		if (cssText) {
-			styletag.childNodes[0].textContent = cssText;
-		} else {
-			if (styletag.parentNode) {
-				styletag.parentNode.removeChild(styletag);
-			}
-		}
-	}
-	dom.childNodes.forEach(node => {
-		result += stringifyNode(node);
-	});
-
-	return result;
+	if (!dom) return '';
+	return dom.childNodes.reduce((result, node) => `${result}${stringifyNode(node)}`, '');
 };

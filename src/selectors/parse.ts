@@ -4,7 +4,7 @@ import { attrChar, attrModifier, classChar, idChar, pseudoChar, selectorUnitComb
 export const parseSelector = (selector: string): ISelector[] => {
 	const selectors: ISelector[] = [];
 	const selectorUnitReg = new RegExp(`^((?:[^\\s>+~#\\.\\[:]+|\\*)?)((?:${idChar}|${classChar}|${attrChar}|${pseudoChar})*)([\\s>+~]+|$)`);
-	let selectorStr = selector;
+	let selectorStr = selector.trim();
 	let selectorExec = selectorUnitReg.exec(selectorStr);
 	while (selectorExec && selectorExec[0].length) {
 		const selectorUnit: ISelector = { id: [], class: [], attr: [], pseudo: [] };
@@ -88,4 +88,8 @@ export const parseSelector = (selector: string): ISelector[] => {
 	}
 
 	return selectors;
+};
+
+export const parseSelectors = (query: string): ISelector[][] => {
+	return query.split(',').map(s => parseSelector(s.trim()));
 };

@@ -1,5 +1,7 @@
 import { IAttr, INode, TCheckFn } from '../../typings/node';
 import { NodeType } from './node-type';
+import { parseSelectors } from 'src/selectors/parse';
+import { getNodesByCondition } from 'src/utils/get-by-cond';
 
 export interface INodeOption {
 	nodeName: string;
@@ -34,7 +36,9 @@ export class Node implements INode {
 
 	parentNode?: INode;
 
-	// 复制自身，但是不复制节点树关系链
+	/**
+	 * 复制自身，但是不复制节点树关系链
+	 */
 	cloneNode(): INode {
 		const cloneNode = new Node({
 			nodeName: this.nodeName,
@@ -58,7 +62,10 @@ export class Node implements INode {
 		return cloneNode;
 	}
 
-	// 追加子节点
+	/**
+	 * 追加子节点
+	 * @param childNode 要追加的节点
+	 */
 	appendChild(childNode: INode): void {
 		if (this.childNodes) {
 			// 如果子节点原本有父节点，则先从原本的父节点中移除
@@ -70,7 +77,11 @@ export class Node implements INode {
 		}
 	}
 
-	// 插入到子节点之前
+	/**
+	 * 插入到子节点之前
+	 * @param childNode 要插入的节点
+	 * @param previousTarget 插入到哪个子字节之前
+	 */
 	insertBefore(childNode: INode, previousTarget: INode): void {
 		if (this.childNodes) {
 			// 如果子节点原本有父节点，则先从原本的父节点中移除
@@ -88,7 +99,11 @@ export class Node implements INode {
 		}
 	}
 
-	// 替换子节点
+	/**
+	 * 替换子节点
+	 * @param childNode 要替换掉哪个节点
+	 * @param children 用来替换的节点列表
+	 */
 	replaceChild(childNode: INode, ...children: INode[]): void {
 		if (this.childNodes) {
 			const index = this.childNodes.indexOf(childNode);
@@ -108,7 +123,10 @@ export class Node implements INode {
 		}
 	}
 
-	// 移除子节点
+	/**
+	 * 移除子节点
+	 * @param childNode 要移除的子节点
+	 */
 	removeChild(childNode: INode): void {
 		if (this.childNodes) {
 			const index = this.childNodes.indexOf(childNode);
@@ -119,7 +137,20 @@ export class Node implements INode {
 		}
 	}
 
-	// 是否存在属性
+	/**
+	 * 移除当前节点
+	 */
+	remove(): void {
+		if (this.parentNode) {
+			this.parentNode.removeChild(this);
+		}
+	}
+
+	/**
+	 * 是否存在属性
+	 * @param name 属性名
+	 * @param namespace 属性命名空间
+	 */
 	hasAttribute(name: string, namespace?: string): boolean {
 		if (this.attributes) {
 			for (const attr of this.attributes) {
@@ -202,19 +233,44 @@ export class Node implements INode {
 		}
 	}
 
+	/**
+	 * 验证当前节点是否符合指定条件
+	 * @param selector 处理函数 / 节点类型 / css 选择器
+	 */
 	matches(selector: string | NodeType | TCheckFn): boolean {
+		// 传入处理函数的情况
+		if (typeof selector === 'function') {
+			return selector(this);
+		}
+
+		// 传入节点类型的情况
+		if (typeof selector === 'number') {
+			return this.nodeType === selector;
+		}
+
+		const selectors = parseSelectors(selector);
+
+		// 传入 css 选择器的情况
 		return false;
 	}
 
 	closest(selector: string | NodeType | TCheckFn): INode | null {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		let tag: INode | undefined = this;
+		while (tag) {
+			if (tag.matches(selector)) {
+				return tag;
+			}
+			tag = tag.parentNode;
+		}
 		return null;
 	}
 
 	querySelector(selector: string | NodeType | TCheckFn): INode | null {
-		return null;
+		return getNodesByCondition(node => node.matches(selector), this, true)[0];
 	}
 	
 	querySelectorAll(selector: string | NodeType | TCheckFn): INode[] {
-		return [];
+		return getNodesByCondition(node => node.matches(selector), this);
 	}
 }
