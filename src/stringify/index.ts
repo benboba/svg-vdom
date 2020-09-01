@@ -1,4 +1,4 @@
-import { IDomNode, INode, ITagNode } from '../../typings/node';
+import { IDocument, INode, ITag } from '../../typings/node';
 import { NodeType } from '../node/node-type';
 import { mixWhiteSpace } from '../utils/mix-white-space';
 
@@ -7,7 +7,7 @@ export const stringifyNode = (node: INode): string => {
 	const textContent = node.textContent;
 	switch (node.nodeType) {
 		case NodeType.Tag:
-			xml += stringifyTag(node as ITagNode);
+			xml += stringifyTag(node as ITag);
 			break;
 		case NodeType.Text:
 			xml += textContent;
@@ -38,7 +38,7 @@ export const stringifyNode = (node: INode): string => {
 	return xml;
 };
 
-export const stringifyTag = (node: ITagNode): string => {
+export const stringifyTag = (node: ITag): string => {
 	let xml = '';
 	xml += `<${node.namespace ? `${node.namespace}:` : ''}${node.nodeName}`;
 	if (node.attributes.length) {
@@ -61,7 +61,7 @@ export const stringifyTag = (node: ITagNode): string => {
 	return xml;
 };
 
-export const stringifyXML = (dom?: IDomNode | null): string => {
+export const stringifyXML = (dom?: IDocument | null): string => {
 	if (!dom) return '';
 	return dom.childNodes.reduce((result, node) => `${result}${stringifyNode(node)}`, '');
 };
