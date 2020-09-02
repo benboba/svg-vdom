@@ -1,10 +1,10 @@
-import { IDocument, INode, ITag } from '../../typings/node';
+import { IDocument, INode, ITag, IText } from '../../typings/node';
 import { NodeType } from '../node/node-type';
 import { mixWhiteSpace } from '../utils/mix-white-space';
 
 export const stringifyNode = (node: INode): string => {
 	let xml = '';
-	const textContent = node.textContent;
+	const textContent = (node as IText).textContent || '';
 	switch (node.nodeType) {
 		case NodeType.Tag:
 			xml += stringifyTag(node as ITag);
@@ -61,7 +61,7 @@ export const stringifyTag = (node: ITag): string => {
 	return xml;
 };
 
-export const stringifyXML = (dom?: IDocument | null): string => {
+export const stringifySVG = (dom?: IDocument | null): string => {
 	if (!dom) return '';
 	return dom.childNodes.reduce((result, node) => `${result}${stringifyNode(node)}`, '');
 };

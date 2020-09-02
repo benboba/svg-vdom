@@ -13,50 +13,47 @@ export interface INode {
 	nodeName: string;
 	nodeType: NodeType;
 	namespace?: string;
-	selfClose?: boolean;
-	textContent?: string;
-
-	attributes?: IAttr[];
-	childNodes?: INode[];
-
-	parentNode?: INode;
+	parentNode?: IParentNode;
 
 	cloneNode(): INode;
+	remove(): void;
+
+	closest(selector: string | NodeType | TCheckFn): INode | null;
+	matches(selector: string | NodeType | TCheckFn): boolean;
+}
+
+export interface IParentNode extends INode {
+	nodeType: NodeType.Tag | NodeType.Document;
+	attributes: IAttr[];
+	childNodes: INode[];
+
+	cloneNode(): IParentNode;
 
 	appendChild(childNode: INode): void;
 	insertBefore(childNode: INode, previousTarget: INode): void;
 	replaceChild(childNode: INode, ...children: INode[]): void;
 	removeChild(childNode: INode): void;
-	remove(): void;
 
 	hasAttribute(name: string, namespace?: string): boolean;
 	getAttribute(name: string, namespace?: string): string | null;
 	setAttribute(name: string, value: string, namespace?: string): void;
 	removeAttribute(name: string, namespace?: string): void;
-
-	closest(selector: string | NodeType | TCheckFn): INode | null;
-	matches(selector: string | NodeType | TCheckFn): boolean;
-	querySelector(selector: string | NodeType | TCheckFn): INode | null;
+	querySelector(selector: string | NodeType | TCheckFn): IParentNode | IText | null;
 	querySelectorAll(selector: string | NodeType | TCheckFn): INode[];
 }
 
-export interface ITag extends INode {
+export interface ITag extends IParentNode {
 	nodeType: NodeType.Tag;
-	childNodes: INode[];
-	attributes: IAttr[];
 	cloneNode(): ITag;
 }
 
-export interface IDocument extends INode {
+export interface IDocument extends IParentNode {
 	nodeType: NodeType.Document;
-	childNodes: INode[];
-	attributes: IAttr[];
 	cloneNode(): IDocument;
 }
 
 export interface IText extends INode {
-	nodeType: NodeType.Text | NodeType.CDATA | NodeType.Comments;
-	childNodes: undefined;
-	attributes: undefined;
+	nodeType: NodeType.Text | NodeType.CDATA | NodeType.Comments | NodeType.XMLDecl | NodeType.DocType;
 	textContent: string;
+	cloneNode(): IText;
 }

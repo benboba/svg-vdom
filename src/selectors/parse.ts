@@ -1,9 +1,13 @@
 import { ISelector } from '../../typings/style';
 import { attrChar, attrModifier, classChar, idChar, pseudoChar, selectorUnitCombinator } from './define';
 
+const selectorUnitChar = '((?:[^\\s>+~#\\.\\[:]+|\\*)?)((?:${idChar}|${classChar}|${attrChar}|${pseudoChar})*)';
+const combinatorChar = '[\\s>+~]+';
+const selectorUnitReg = new RegExp(`^${selectorUnitChar}(${combinatorChar}|$)`);
+const selectorGroupReg = new RegExp(`^(${selectorUnitChar}(?:${combinatorChar}${selectorUnitChar})*)(?:\\s*,|$)`);
+
 export const parseSelector = (selector: string): ISelector[] => {
 	const selectors: ISelector[] = [];
-	const selectorUnitReg = new RegExp(`^((?:[^\\s>+~#\\.\\[:]+|\\*)?)((?:${idChar}|${classChar}|${attrChar}|${pseudoChar})*)([\\s>+~]+|$)`);
 	let selectorStr = selector.trim();
 	let selectorExec = selectorUnitReg.exec(selectorStr);
 	while (selectorExec && selectorExec[0].length) {
@@ -90,6 +94,16 @@ export const parseSelector = (selector: string): ISelector[] => {
 	return selectors;
 };
 
-export const parseSelectors = (query: string): ISelector[][] => {
-	return query.split(',').map(s => parseSelector(s.trim()));
+export const parseSelectorGroup = (query: string): string[] => {
+	const groups: string[] = [];
+	let queryStr = query.trim();
+	let queryExec = selectorGroupReg.exec(queryStr);
+
+	while (queryExec) {
+		groups.push(queryExec[1]);
+		queryStr = queryStr.slice(queryExec[0].length).trim();
+		queryExec = selectorGroupReg.exec(queryStr);
+	}
+
+	return groups;
 };

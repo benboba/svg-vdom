@@ -1,6 +1,6 @@
 import { IDynamicObj } from '../../typings';
-import { IDocument } from '../../typings/node';
-import { Node } from '../node';
+import { IDocument, INode, IParentNode, ITag, IText } from '../../typings/node';
+import { ParentNode, TextNode } from '../node';
 import { NodeType } from '../node/node-type';
 import { collapseQuots } from '../utils/collapse-quots';
 import { mixWhiteSpace } from '../utils/mix-white-space';
@@ -12,8 +12,15 @@ interface IStatus {
 	lastpos: number;
 }
 
-interface ICurrent {
-	node: Node;
+interface IEndTag {
+	nodeType: -1;
+	nodeName: string;
+	namespace: string;
+}
+
+interface ICurrent<T extends IParentNode | IText | IEndTag = IParentNode | IText | IEndTag> {
+	node: T;
+	selfClose?: boolean;
 	lastIndex: number;
 }
 
@@ -38,37 +45,37 @@ const updStatus = (pos: number, str: string, status: IStatus) => {
 	}
 };
 
-const ProcessTagLess = ([name, reg, type]: typeof configs[0], str: string, lastIndex: number): ICurrent | null => {
+const ProcessTagLess = ([name, reg, type]: typeof configs[0], str: string, lastIndex: number): ICurrent<IText> | null => {
 	reg.lastIndex = lastIndex;
 	const execResult = reg.exec(str);
 	if (execResult && execResult.index === lastIndex) {
 		return {
-			node: new Node({
+			node: new TextNode({
 				nodeType: type,
 				nodeName: `#${name}`,
 				textContent: execResult[0],
 			}),
 			lastIndex: reg.lastIndex,
-		};
+		} as ICurrent<IText>;
 	}
 	return null;
 };
 
 // 处理标签
-const ProcessTag = (str: string, status: IStatus, lastIndex: number): ICurrent | null => {
+const ProcessTag = (str: string, status: IStatus, lastIndex: number): ICurrent<IParentNode> | null => {
 	REG_START_TAG.lastIndex = lastIndex;
 	const execResult = REG_START_TAG.exec(str);
 	if (execResult && execResult.index === lastIndex) {
 		const tempStatus: IStatus = { line: status.line, pos: status.pos, lastpos: 0 };
 		const result = {
-			node: new Node({
+			node: new ParentNode({
 				nodeType: NodeType.Tag,
 				nodeName: execResult[1],
 				namespace: '',
-				selfClose: execResult[3] === '/',
 			}),
+			selfClose: execResult[3] === '/',
 			lastIndex: REG_START_TAG.lastIndex,
-		};
+		} as ICurrent<IParentNode>;
 
 		// 标签的 namespace
 		if (execResult[1].includes(':')) {
@@ -116,16 +123,16 @@ const ProcessTag = (str: string, status: IStatus, lastIndex: number): ICurrent |
 };
 
 
-const ProcessEndTag = (str: string, status: IStatus, lastIndex: number): ICurrent | null => {
+const ProcessEndTag = (str: string, status: IStatus, lastIndex: number): ICurrent<IEndTag> | null => {
 	REG_END_TAG.lastIndex = lastIndex;
 	const execResult = REG_END_TAG.exec(str);
 	if (execResult && execResult.index === lastIndex) {
-		const result = {
-			node: new Node({
-				nodeType: NodeType.EndTag,
+		const result: ICurrent<IEndTag> = {
+			node: {
+				nodeType: -1,
 				nodeName: execResult[1],
 				namespace: '',
-			}),
+			},
 			lastIndex: REG_END_TAG.lastIndex,
 		};
 		if (execResult[1].includes(':')) {
@@ -151,9 +158,9 @@ const parseNode = (str: string, status: IStatus, lastIndex: number): ICurrent =>
 		if (ltExec.index === lastIndex) { // 以 < 开始的情况都按节点处理
 
 			for (const cfg of configs) {
-				const processResult1 = ProcessTagLess(cfg, str, lastIndex);
-				if (processResult1) {
-					return processResult1;
+				const processTagLess = ProcessTagLess(cfg, str, lastIndex);
+				if (processTagLess) {
+					return processTagLess;
 				}
 			}
 
@@ -171,33 +178,36 @@ const parseNode = (str: string, status: IStatus, lastIndex: number): ICurrent =>
 		} else { // 非 < 开始的都按文本处理
 
 			return {
-				node: new Node({
+				node: new TextNode({
 					nodeType: NodeType.Text,
 					nodeName: '#text',
 					textContent: mixWhiteSpace(str.slice(lastIndex, ltExec.index)),
 				}),
 				lastIndex: ltExec.index,
-			};
+			} as ICurrent<IText>;
+
 		}
 	} else {
+
 		return {
-			node: new Node({
+			node: new TextNode({
 				nodeType: NodeType.Text,
 				nodeName: '#text',
 				textContent: mixWhiteSpace(str.slice(lastIndex)),
 			}),
 			lastIndex: str.length,
-		};
+		} as ICurrent<IText>;
+
 	}
 };
 
 export const parse = async (str: string): Promise<IDocument> => {
 	return new Promise((resolve, reject) => {
-		const doc = new Node({
+		const doc = new ParentNode({
 			nodeType: NodeType.Document,
 			nodeName: '#document',
 		}) as IDocument;
-		const stack: Node[] = [];
+		const stack: Array<IDocument | ITag> = [];
 		const status: IStatus = {
 			line: 1,
 			pos: 0,
@@ -205,7 +215,7 @@ export const parse = async (str: string): Promise<IDocument> => {
 		};
 		const len = str.length;
 
-		let current: { node: Node; lastIndex: number };
+		let current: ICurrent;
 		let hasRoot = false;
 		const firstIndex = str.indexOf('<');
 		if (firstIndex > 0 && !/^\s+</.test(str)) {
@@ -219,14 +229,17 @@ export const parse = async (str: string): Promise<IDocument> => {
 			return;
 		}
 		if (current.node.nodeType === NodeType.XMLDecl && firstIndex > 0) {
-			reject(new Error(`The xml declaration must be At the front of the document! At ${status.line}:${status.pos}`));
+			reject(new Error(`The xml declaration must be at the front of the document! At ${status.line}:${status.pos}`));
 			return;
 		}
-		doc.appendChild(current.node);
+		if (current.node.nodeType === -1) {
+			reject(new Error(`The start and end tags cannot match! At ${status.line}:${status.pos}`));
+		}
+		doc.appendChild(current.node as INode);
 		if (current.node.nodeType === NodeType.Tag) {
 			hasRoot = true;
-			if (!current.node.selfClose) {
-				stack.push(current.node);
+			if (!current.selfClose) {
+				stack.push(current.node as ITag);
 			}
 		}
 
@@ -242,17 +255,12 @@ export const parse = async (str: string): Promise<IDocument> => {
 
 			const stackLen = stack.length;
 
-			if (current.node.nodeType === NodeType.EndTag) {
+			if (current.node.nodeType === -1) {
 
 				// 遇到结束标签的处理逻辑
 				if (stackLen) {
 					// 结束标签和开始标签匹配
 					if (stack[stackLen - 1].nodeName === current.node.nodeName && stack[stackLen - 1].namespace === current.node.namespace) {
-						// 无子节点，则转为自闭合节点
-						const childNodes = stack[stackLen - 1].childNodes;
-						if (!childNodes || !childNodes.length) {
-							stack[stackLen - 1].selfClose = true;
-						}
 						stack.pop();
 					} else {
 						reject(new Error(`The start and end tags cannot match! At ${status.line}:${status.pos}`));
@@ -267,22 +275,21 @@ export const parse = async (str: string): Promise<IDocument> => {
 
 			} else {
 
-
 				if (stackLen) {
 					// 插入子节点
-					stack[stackLen - 1].appendChild(current.node);
-				} else if (current.node.nodeType === NodeType.Text || current.node.nodeType === NodeType.CDATA) {
+					stack[stackLen - 1].appendChild(current.node as INode);
+				} else if ((current.node as IText).textContent) {
 					// 没有节点而出现了非空文本节点
-					if ((current.node.textContent as string).replace(/\s/g, '')) {
+					if ((current.node as IText).textContent.trim()) {
 						reject(new Error(`Unexpected text node! At ${status.line}:${status.pos}`));
 						return;
 					}
 				} else {
 					// 直接扔到根下
-					doc.appendChild(current.node);
+					doc.appendChild(current.node as INode);
 				}
 				// 遇到未闭合的节点，扔到stack内
-				if (current.node.nodeType === NodeType.Tag) {
+				if ((current.node as INode).nodeType === NodeType.Tag) {
 					if (!stackLen) {
 						if (hasRoot) {
 							reject(new Error(`Only one root element node is allowed! At ${status.line}:${status.pos}`));
@@ -290,8 +297,8 @@ export const parse = async (str: string): Promise<IDocument> => {
 						}
 						hasRoot = true;
 					}
-					if (!current.node.selfClose) {
-						stack.push(current.node);
+					if (!current.selfClose) {
+						stack.push(current.node as ITag);
 					}
 				}
 			}
