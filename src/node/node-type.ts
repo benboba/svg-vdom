@@ -9,4 +9,5 @@ export enum NodeType {
 	Comments = 8,
 	Document = 9,
 	DocType = 10,
+	DocumentFragment = 11,
 }

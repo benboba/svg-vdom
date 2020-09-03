@@ -1,6 +1,8 @@
-import { NodeType, parse, stringifySVG, stringifyTag, stringifyNode } from '../src';
-import { TextNode, ParentNode } from '../src/node';
-import { IDocument, ITag } from '../typings/node';
+import { NodeType, parse, stringifyNode, stringifySVG, stringifyTag } from '../src';
+import { ParentNode } from '../src/node/parent';
+import { TagNode } from '../src/node/tag';
+import { TextNode } from '../src/node/text';
+import { IDocument } from '../typings/node';
 
 describe('XML_PARSER', () => {
 	test('解析超大文档', async () => {
@@ -530,153 +532,43 @@ describe('XML_PARSER', () => {
 		expect(dom.childNodes[1].nodeName).toBe('svg');
 		expect(dom.childNodes[1].nodeType).toBe(NodeType.Tag);
 	});
-
-	test('Node 覆盖率补全', async () => {
-		const xml = new TextNode({
-			nodeName: '#xml-decl',
-			nodeType: NodeType.XMLDecl,
-			textContent: '',
-		});
-		const xmlClone = xml.cloneNode();
-		const dom = new ParentNode({
-			nodeName: '#document',
-			nodeType: NodeType.Document,
-		});
-		dom.removeChild(xml);
-		dom.appendChild(xml);
-		dom.setAttribute('test', '1', 'testns');
-		dom.removeAttribute('test');
-		expect(dom.attributes.length).toBe(1);
-		dom.removeAttribute('test', 'testns');
-		expect(dom.attributes.length).toBe(0);
-		dom.insertBefore(xmlClone, xmlClone);
-		dom.insertBefore(xml, xmlClone);
-		dom.replaceChild(xml, xmlClone);
-		dom.replaceChild(xml, xmlClone);
-		dom.replaceChild(xmlClone, new ParentNode({
-			nodeName: 'g',
-			nodeType: NodeType.Tag,
-		}));
-		expect(dom.childNodes.length).toBe(1);
-		dom.removeChild(xmlClone);
-		expect(dom.childNodes.length).toBe(1);
-	});
 });
 
-describe('XMLPARSER badcase', function() {
-	test('xml声明必须在最前面', function() {
-		parse(' <?xml version="1.1" ?><svg/>').catch(err => {
-			expect(err.message).toMatch(/^The xml declaration must be at the front of the document!/);
-		});
+test('stringify', function() {
+	const dom = new ParentNode({
+		nodeName: '#document',
+		nodeType: NodeType.Document,
+	}) as IDocument;
+
+	const xml = new TextNode({
+		nodeName: '#xml-decl',
+		nodeType: NodeType.XMLDecl,
+		textContent: '',
 	});
 
-	test('文档结构错误', function() {
-		parse('<svg>').catch(err => {
-			expect(err.message).toMatch(/^Document structure is wrong!/);
-		});
+	dom.appendChild(xml);
+
+	const svg = new TagNode({
+		nodeName: 'svg',
+		nodeType: NodeType.Tag,
 	});
+	dom.appendChild(svg.cloneNode());
+	svg.setAttribute('width', '100');
+	svg.setAttribute('href', '1', 'xlink');
+	expect(svg.hasAttribute('xlink:href')).toBeTruthy;
+	expect(svg.hasAttribute('xml:href')).toBeFalsy;
+	expect(svg.hasAttribute('width')).toBeTruthy;
+	expect(svg.hasAttribute('height')).toBeFalsy;
+	svg.setAttribute('height', '100');
+	expect(svg.hasAttribute('height')).toBeTruthy;
+	svg.setAttribute('width', '200');
+	expect(svg.getAttribute('width')).toBe('200');
+	svg.removeAttribute('href', 'xlink');
+	expect(svg.attributes.length).toBe(2);
+	dom.appendChild(svg);
+	dom.appendChild(svg.cloneNode());
 
-	test('开始和结束标签无法匹配', function() {
-		parse('<svg></html>').catch(err => {
-			expect(err.message).toMatch(/^The start and end tags cannot match!/);
-		});
-	});
-
-	test('只允许出现一个根元素节点', function() {
-		parse('<svg/><svg/>').catch(err => {
-			expect(err.message).toMatch(/^Only one root element node is allowed!/);
-		});
-	});
-
-	test('没有根元素节点', function() {
-		parse('').catch(err => {
-			expect(err.message).toMatch(/^No root element node!/);
-		});
-	});
-
-	test('属性名重复', function() {
-		parse('<svg attr="1" attr="2"/>').catch(err => {
-			expect(err.message).toMatch(/^Duplicate property names!/);
-		});
-	});
-
-	test('意外的结束标签', function() {
-		parse('<svg/></svg>').catch(err => {
-			expect(err.message).toMatch(/^Unexpected end tag!/);
-		});
-	});
-
-	test('意外的文本节点', function() {
-		parse('<svg/>123').catch(err => {
-			expect(err.message).toMatch(/^Unexpected text node!/);
-		});
-	});
-
-	test('意外的文本节点2', function() {
-		parse('  a <svg/>').catch(err => {
-			expect(err.message).toMatch(/^Unexpected text node!/);
-		});
-	});
-
-	test('错误的开始标签', function() {
-		parse('<svg:/>').catch(err => {
-			expect(err.message).toMatch(/^Wrong start tag!/);
-		});
-	});
-
-	test('错误的结束标签', function() {
-		parse('<svg></:svg>').catch(err => {
-			expect(err.message).toMatch(/^Wrong end tag!/);
-		});
-	});
-
-	test('错误的属性名', function() {
-		parse('<svg attr:="1"/>').catch(err => {
-			expect(err.message).toMatch(/^Wrong attribute name!/);
-		});
-	});
-
-	test('错误的属性名2', function() {
-		parse(`<svg
-		:attr=""/>`).catch(err => {
-			expect(err.message).toMatch(/^Wrong attribute name!/);
-		});
-	});
-
-	test('解析标签失败', function() {
-		parse('< svg />').catch(err => {
-			expect(err.message).toMatch(/^Failed to parse nodes!/);
-		});
-	});
-});
-
-describe('stringify', function() {
-	test('字符串化', function() {
-		const dom = new ParentNode({
-			nodeName: '#document',
-			nodeType: NodeType.Document,
-		}) as IDocument;
-
-		const xml = new TextNode({
-			nodeName: '#xml-decl',
-			nodeType: NodeType.XMLDecl,
-			textContent: '',
-		});
-
-		dom.appendChild(xml);
-
-		const svg = new ParentNode({
-			nodeName: 'svg',
-			nodeType: NodeType.Tag,
-		}) as ITag;
-		dom.appendChild(svg.cloneNode());
-		svg.setAttribute('width', '200');
-		svg.setAttribute('height', '100');
-		dom.appendChild(svg);
-		dom.appendChild(svg.cloneNode());
-
-		expect(stringifySVG(dom)).toBe('<?xml?><svg/><svg width="200" height="100"/><svg width="200" height="100"/>');
-		expect(stringifyTag(svg)).toBe('<svg width="200" height="100"/>');
-		expect(stringifyNode(xml)).toBe('<?xml?>');
-	});
+	expect(stringifySVG(dom)).toBe('<?xml?><svg/><svg width="200" height="100"/><svg width="200" height="100"/>');
+	expect(stringifyTag(svg)).toBe('<svg width="200" height="100"/>');
+	expect(stringifyNode(xml)).toBe('<?xml?>');
 });

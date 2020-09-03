@@ -1,4 +1,5 @@
 import { NodeType } from '../src/node/node-type';
+import { ISelector } from './style';
 
 export interface IAttr {
 	name: string;
@@ -8,6 +9,7 @@ export interface IAttr {
 }
 
 export type TCheckFn = (n: INode) => boolean;
+export type TSelector = string | NodeType | TCheckFn | ISelector[][];
 
 export interface INode {
 	nodeName: string;
@@ -16,35 +18,25 @@ export interface INode {
 	parentNode?: IParentNode;
 
 	cloneNode(): INode;
-	remove(): void;
+	remove(): boolean;
 
-	closest(selector: string | NodeType | TCheckFn): INode | null;
-	matches(selector: string | NodeType | TCheckFn): boolean;
+	closest(selector: TSelector): INode | null;
+	matches(selector: TSelector): boolean;
 }
 
 export interface IParentNode extends INode {
-	nodeType: NodeType.Tag | NodeType.Document;
-	attributes: IAttr[];
+	nodeType: NodeType.Tag | NodeType.Document | NodeType.DocumentFragment;
 	childNodes: INode[];
 
 	cloneNode(): IParentNode;
 
-	appendChild(childNode: INode): void;
-	insertBefore(childNode: INode, previousTarget: INode): void;
-	replaceChild(childNode: INode, ...children: INode[]): void;
-	removeChild(childNode: INode): void;
+	appendChild(childNode: INode): boolean;
+	insertBefore(childNode: INode, previousTarget: INode): boolean;
+	replaceChild(newChild: INode, oldChild: INode): INode | null;
+	removeChild(childNode: INode): boolean;
 
-	hasAttribute(name: string, namespace?: string): boolean;
-	getAttribute(name: string, namespace?: string): string | null;
-	setAttribute(name: string, value: string, namespace?: string): void;
-	removeAttribute(name: string, namespace?: string): void;
-	querySelector(selector: string | NodeType | TCheckFn): IParentNode | IText | null;
-	querySelectorAll(selector: string | NodeType | TCheckFn): INode[];
-}
-
-export interface ITag extends IParentNode {
-	nodeType: NodeType.Tag;
-	cloneNode(): ITag;
+	querySelector(selector: TSelector): IParentNode | ITextNode | null;
+	querySelectorAll(selector: TSelector): INode[];
 }
 
 export interface IDocument extends IParentNode {
@@ -52,8 +44,26 @@ export interface IDocument extends IParentNode {
 	cloneNode(): IDocument;
 }
 
-export interface IText extends INode {
+export interface IDocumentFragment extends IParentNode {
+	nodeType: NodeType.DocumentFragment;
+	parentNode: undefined;
+	cloneNode(): IDocumentFragment;
+}
+
+export interface ITag extends IParentNode {
+	nodeType: NodeType.Tag;
+	attributes: IAttr[];
+
+	cloneNode(): ITag;
+
+	hasAttribute(name: string, namespace?: string): boolean;
+	getAttribute(name: string, namespace?: string): string | null;
+	setAttribute(name: string, value: string, namespace?: string): void;
+	removeAttribute(name: string, namespace?: string): boolean;
+}
+
+export interface ITextNode extends INode {
 	nodeType: NodeType.Text | NodeType.CDATA | NodeType.Comments | NodeType.XMLDecl | NodeType.DocType;
 	textContent: string;
-	cloneNode(): IText;
+	cloneNode(): ITextNode;
 }

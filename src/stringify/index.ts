@@ -1,10 +1,10 @@
-import { IDocument, INode, ITag, IText } from '../../typings/node';
+import { IDocument, INode, ITag, ITextNode } from '../../typings/node';
 import { NodeType } from '../node/node-type';
 import { mixWhiteSpace } from '../utils/mix-white-space';
 
 export const stringifyNode = (node: INode): string => {
 	let xml = '';
-	const textContent = (node as IText).textContent || '';
+	const textContent = (node as ITextNode).textContent || '';
 	switch (node.nodeType) {
 		case NodeType.Tag:
 			xml += stringifyTag(node as ITag);

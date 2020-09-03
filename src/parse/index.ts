@@ -1,7 +1,9 @@
 import { IDynamicObj } from '../../typings';
-import { IDocument, INode, IParentNode, ITag, IText } from '../../typings/node';
-import { ParentNode, TextNode } from '../node';
+import { IDocument, INode, IParentNode, ITag, ITextNode } from '../../typings/node';
 import { NodeType } from '../node/node-type';
+import { ParentNode } from '../node/parent';
+import { TagNode } from '../node/tag';
+import { TextNode } from '../node/text';
 import { collapseQuots } from '../utils/collapse-quots';
 import { mixWhiteSpace } from '../utils/mix-white-space';
 import { REG_ATTR, REG_CDATA_SECT, REG_COMMENTS, REG_DOCTYPE, REG_END_TAG, REG_START_TAG, REG_XML_DECL } from './regs';
@@ -18,7 +20,7 @@ interface IEndTag {
 	namespace: string;
 }
 
-interface ICurrent<T extends IParentNode | IText | IEndTag = IParentNode | IText | IEndTag> {
+interface ICurrent<T extends IParentNode | ITextNode | IEndTag = IParentNode | ITextNode | IEndTag> {
 	node: T;
 	selfClose?: boolean;
 	lastIndex: number;
@@ -45,7 +47,7 @@ const updStatus = (pos: number, str: string, status: IStatus) => {
 	}
 };
 
-const ProcessTagLess = ([name, reg, type]: typeof configs[0], str: string, lastIndex: number): ICurrent<IText> | null => {
+const ProcessTagLess = ([name, reg, type]: typeof configs[0], str: string, lastIndex: number): ICurrent<ITextNode> | null => {
 	reg.lastIndex = lastIndex;
 	const execResult = reg.exec(str);
 	if (execResult && execResult.index === lastIndex) {
@@ -56,7 +58,7 @@ const ProcessTagLess = ([name, reg, type]: typeof configs[0], str: string, lastI
 				textContent: execResult[0],
 			}),
 			lastIndex: reg.lastIndex,
-		} as ICurrent<IText>;
+		} as ICurrent<ITextNode>;
 	}
 	return null;
 };
@@ -68,7 +70,7 @@ const ProcessTag = (str: string, status: IStatus, lastIndex: number): ICurrent<I
 	if (execResult && execResult.index === lastIndex) {
 		const tempStatus: IStatus = { line: status.line, pos: status.pos, lastpos: 0 };
 		const result = {
-			node: new ParentNode({
+			node: new TagNode({
 				nodeType: NodeType.Tag,
 				nodeName: execResult[1],
 				namespace: '',
@@ -107,12 +109,12 @@ const ProcessTag = (str: string, status: IStatus, lastIndex: number): ICurrent<I
 			if (attrExec[1].includes(':')) {
 				const attrName = attrExec[1].split(':');
 				if (attrName.length === 2 && attrName[0] && attrName[1]) {
-					result.node.setAttribute(attrName[1], collapseQuots(attrExec[2]).trim(), attrName[0]);
+					(result.node as ITag).setAttribute(attrName[1], collapseQuots(attrExec[2]).trim(), attrName[0]);
 				} else {
 					throw new Error(`Wrong attribute name! At ${tempStatus.line + status.line - 1}:${tempStatus.line > 1 ? tempStatus.pos : status.pos + tempStatus.pos}`);
 				}
 			} else {
-				result.node.setAttribute(attrExec[1], collapseQuots(attrExec[2]).trim());
+				(result.node as ITag).setAttribute(attrExec[1], collapseQuots(attrExec[2]).trim());
 			}
 			attrExec = REG_ATTR.exec(execResult[2]);
 		}
@@ -184,7 +186,7 @@ const parseNode = (str: string, status: IStatus, lastIndex: number): ICurrent =>
 					textContent: mixWhiteSpace(str.slice(lastIndex, ltExec.index)),
 				}),
 				lastIndex: ltExec.index,
-			} as ICurrent<IText>;
+			} as ICurrent<ITextNode>;
 
 		}
 	} else {
@@ -196,7 +198,7 @@ const parseNode = (str: string, status: IStatus, lastIndex: number): ICurrent =>
 				textContent: mixWhiteSpace(str.slice(lastIndex)),
 			}),
 			lastIndex: str.length,
-		} as ICurrent<IText>;
+		} as ICurrent<ITextNode>;
 
 	}
 };
@@ -278,9 +280,9 @@ export const parse = async (str: string): Promise<IDocument> => {
 				if (stackLen) {
 					// 插入子节点
 					stack[stackLen - 1].appendChild(current.node as INode);
-				} else if ((current.node as IText).textContent) {
+				} else if ((current.node as ITextNode).textContent) {
 					// 没有节点而出现了非空文本节点
-					if ((current.node as IText).textContent.trim()) {
+					if ((current.node as ITextNode).textContent.trim()) {
 						reject(new Error(`Unexpected text node! At ${status.line}:${status.pos}`));
 						return;
 					}

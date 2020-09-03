@@ -1,5 +1,7 @@
-import { ParentNode, TextNode } from '../../src/node';
 import { NodeType } from '../../src/node/node-type';
+import { ParentNode } from '../../src/node/parent';
+import { TagNode } from '../../src/node/tag';
+import { TextNode } from '../../src/node/text';
 
 test('节点', function() {
 	const dom = new ParentNode({
@@ -17,12 +19,12 @@ test('节点', function() {
 
 	dom.appendChild(xml);
 
-	const svg = new ParentNode({
+	const svg = new TagNode({
 		nodeName: 'svg',
 		nodeType: NodeType.Tag,
 	});
 
-	const text = new ParentNode({
+	const text = new TagNode({
 		nodeName: '#text',
 		nodeType: NodeType.Tag,
 	});
@@ -50,4 +52,7 @@ test('节点', function() {
 	svg.appendChild(g);
 	dom.appendChild(svg);
 	expect(g.matches('svg > g')).toBeTruthy;
+	expect(g.closest('g')).toBe(g);
+	expect(g.closest(NodeType.Document)).toBe(dom);
+	expect(g.closest(NodeType.DocumentFragment)).toBeNull;
 });

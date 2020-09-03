@@ -1,0 +1,100 @@
+import { parse } from '../../src/parse';
+
+describe('parse badcase', function() {
+	test('xml声明必须在最前面', function() {
+		parse(' <?xml version="1.1" ?><svg/>').catch(err => {
+			expect(err.message).toMatch(/^The xml declaration must be at the front of the document!/);
+		});
+	});
+
+	test('文档结构错误', function() {
+		parse('<svg>').catch(err => {
+			expect(err.message).toMatch(/^Document structure is wrong!/);
+		});
+	});
+
+	test('开始和结束标签无法匹配', function() {
+		parse('<svg></html>').catch(err => {
+			expect(err.message).toMatch(/^The start and end tags cannot match!/);
+		});
+	});
+
+	test('开始和结束标签无法匹配', function() {
+		parse('</svg>').catch(err => {
+			expect(err.message).toMatch(/^The start and end tags cannot match!/);
+		});
+	});
+
+	test('只允许出现一个根元素节点', function() {
+		parse('<svg/><svg/>').catch(err => {
+			expect(err.message).toMatch(/^Only one root element node is allowed!/);
+		});
+	});
+
+	test('没有根元素节点', function() {
+		parse('').catch(err => {
+			expect(err.message).toMatch(/^No root element node!/);
+		});
+	});
+
+	test('属性名重复', function() {
+		parse('<svg attr="1" attr="2"/>').catch(err => {
+			expect(err.message).toMatch(/^Duplicate property names!/);
+		});
+	});
+
+	test('意外的结束标签', function() {
+		parse('<svg/></svg>').catch(err => {
+			expect(err.message).toMatch(/^Unexpected end tag!/);
+		});
+	});
+
+	test('意外的文本节点', function() {
+		parse('<svg/>123').catch(err => {
+			expect(err.message).toMatch(/^Unexpected text node!/);
+		});
+	});
+
+	test('意外的文本节点2', function() {
+		parse('  a <svg/>').catch(err => {
+			expect(err.message).toMatch(/^Unexpected text node!/);
+		});
+	});
+
+	test('错误的开始标签', function() {
+		parse('<svg:/>').catch(err => {
+			expect(err.message).toMatch(/^Wrong start tag!/);
+		});
+	});
+
+	test('错误的结束标签', function() {
+		parse('<svg></:svg>').catch(err => {
+			expect(err.message).toMatch(/^Wrong end tag!/);
+		});
+	});
+
+	test('错误的属性名', function() {
+		parse('<svg attr:="1"/>').catch(err => {
+			expect(err.message).toMatch(/^Wrong attribute name!/);
+		});
+	});
+
+	test('错误的属性名2', function() {
+		parse(`<svg
+		:attr=""/>`).catch(err => {
+			expect(err.message).toMatch(/^Wrong attribute name!/);
+		});
+	});
+
+	test('解析标签失败', function() {
+		parse('< svg />').catch(err => {
+			expect(err.message).toMatch(/^Failed to parse nodes!/);
+		});
+	});
+});
+
+test('namespace', async function() {
+	const dom = await parse('<xml:svg></xml:svg>');
+	expect(dom.childNodes.length).toBe(1);
+	expect(dom.childNodes[0].namespace).toBe('xml');
+});

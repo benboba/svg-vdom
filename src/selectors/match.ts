@@ -2,7 +2,6 @@ import { INode, ITag } from '../../typings/node';
 import { ISelector } from '../../typings/style';
 import { NodeType } from '../node/node-type';
 import { attrModifier, selectorUnitCombinator, validPseudoClass, validPseudoElement } from './define';
-import { parseSelector } from './parse';
 
 // 验证 className
 const checkClass = (node: INode, selector: ISelector): boolean => {
@@ -144,18 +143,17 @@ export const matchSelector = (selector: ISelector, node: INode): boolean => {
 	return true;
 };
 
-export const matchBySelectors = (selectorGroups: string[], node: INode) => selectorGroups.some(selectorGroup => {
-	const selectors = parseSelector(selectorGroup);
-	const len = selectors.length;
-	if (!matchSelector(selectors[len - 1], node)) return false;
+export const matchBySelectors = (selectorGroups: Array<ISelector[]>, node: INode) => selectorGroups.some(selectors => {
+	const selectorsLength = selectors.length;
+	if (!matchSelector(selectors[selectorsLength - 1], node)) return false;
 	let currentNode: INode = node;
-	let i = len - 2;
-	while (i >= 0) {
-		switch (selectors[i].combinator) {
+	let currentSelectorIndex = selectorsLength - 2;
+	while (currentSelectorIndex >= 0) {
+		switch (selectors[currentSelectorIndex].combinator) {
 			// 子选择器
 			case selectorUnitCombinator['>']:
 				if (currentNode.parentNode) {
-					if (!matchSelector(selectors[i], currentNode.parentNode)) {
+					if (!matchSelector(selectors[currentSelectorIndex], currentNode.parentNode)) {
 						return false;
 					}
 					currentNode = currentNode.parentNode;
@@ -166,11 +164,11 @@ export const matchBySelectors = (selectorGroups: string[], node: INode) => selec
 			case selectorUnitCombinator['+']:
 				if (currentNode.parentNode) {
 					const brothers = currentNode.parentNode.childNodes;
-					const index = brothers.indexOf(currentNode);
-					if (index <= 0 || !matchSelector(selectors[i], brothers[index - 1])) {
+					const nodeIndex = brothers.indexOf(currentNode);
+					if (nodeIndex <= 0 || !matchSelector(selectors[currentSelectorIndex], brothers[nodeIndex - 1])) {
 						return false;
 					}
-					currentNode = brothers[index - 1];
+					currentNode = brothers[nodeIndex - 1];
 					break;
 				}
 				return false;
@@ -178,16 +176,16 @@ export const matchBySelectors = (selectorGroups: string[], node: INode) => selec
 			case selectorUnitCombinator['~']:
 				if (currentNode.parentNode) {
 					const _brothers = currentNode.parentNode.childNodes;
-					const _index = _brothers.indexOf(currentNode);
-					if (_index <= 0) {
+					const index = _brothers.indexOf(currentNode);
+					if (index <= 0) {
 						return false;
 					}
 					let _brother: INode | undefined;
-					for (let bi = _index; bi--;) {
+					for (let bi = index; bi--;) {
 						_brother = _brothers[bi];
-						if (matchSelector(selectors[i], _brother)) {
+						if (matchSelector(selectors[currentSelectorIndex], _brother)) {
 							currentNode = _brother;
-							return false;
+							break;
 						}
 					}
 					if (currentNode !== _brother) {
@@ -200,7 +198,7 @@ export const matchBySelectors = (selectorGroups: string[], node: INode) => selec
 			default: {
 				let parent = currentNode.parentNode;
 				while (parent) {
-					if (matchSelector(selectors[i], parent)) {
+					if (matchSelector(selectors[currentSelectorIndex], parent)) {
 						currentNode = parent;
 						break;
 					}
@@ -212,7 +210,7 @@ export const matchBySelectors = (selectorGroups: string[], node: INode) => selec
 				break;
 			}
 		}
-		i--;
+		currentSelectorIndex--;
 	}
 	return true;
 });
