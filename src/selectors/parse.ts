@@ -1,19 +1,17 @@
 import { ISelector } from '../../typings/style';
 import { attrChar, attrModifier, classChar, idChar, pseudoChar, selectorUnitCombinator } from './define';
 
-const tagChar = '(?:[^\\s>+~#\\.\\[:,*]+|\\*)?';
-const selectorChar = `(?:${idChar}|${classChar}|${attrChar}|${pseudoChar})*`;
+const tagChar = '(?:[a-zA-Z]+|\\*)';
+const selectorChar = `(?:${idChar}|${classChar}|${attrChar}|${pseudoChar})`;
 const combinatorChar = '(?:\\s*[>+~]\\s*|\\s+)';
-const selectorUnitReg = new RegExp(`^(${tagChar})(${selectorChar})(${combinatorChar}|$)`, 'g');
-const selectorGroupReg = new RegExp(`^(${tagChar}${selectorChar}(?:${combinatorChar}${tagChar}${selectorChar})*)\\s*(?:,|$)`, 'g');
+const selectorUnitReg = new RegExp(`^(${tagChar}?)(${selectorChar}*)(${combinatorChar}|$)`);
+const selectorGroupReg = new RegExp(`^((?:${tagChar}${selectorChar}*|${tagChar}?${selectorChar}+)(?:${combinatorChar}(?:${tagChar}${selectorChar}*|${tagChar}?${selectorChar}+))*)\\s*(?:,|$)`);
 
 const parseSelectorUnit = (selector: string): ISelector[] => {
 	const selectors: ISelector[] = [];
 	let selectorStr = selector.trim();
-	selectorUnitReg.lastIndex = 0;
 	let selectorExec = selectorUnitReg.exec(selectorStr);
 	while (selectorExec && selectorExec[0].length) {
-		console.log(selectorExec);
 		const selectorUnit: ISelector = { id: [], class: [], attr: [], pseudo: [] };
 		if (selectorExec[1]) {
 			if (selectorExec[1] === '*') {
@@ -24,7 +22,7 @@ const parseSelectorUnit = (selector: string): ISelector[] => {
 		}
 		if (selectorExec[2]) {
 			let specialStr = selectorExec[2];
-			const specialReg = new RegExp(`^(?:${idChar}|${classChar}|${attrChar}|${pseudoChar})`);
+			const specialReg = new RegExp(`^${selectorChar}`);
 			let specialExec = specialReg.exec(specialStr);
 			while (specialExec) {
 				switch (specialExec[0][0]) {
@@ -90,24 +88,25 @@ const parseSelectorUnit = (selector: string): ISelector[] => {
 			}
 		}
 		selectors.push(selectorUnit);
-		selectorStr = selectorStr.slice(selectorExec[0].length);
+		selectorStr = selectorStr.slice(selectorExec[0].length).trim();
 		selectorExec = selectorUnitReg.exec(selectorStr);
 	}
-	console.log(selector, JSON.stringify(selectors));
 	return selectors;
 };
 
 export const parseSelector = (query: string) => {
 	const groups: ISelector[][] = [];
 	let queryStr = query.trim();
-	selectorGroupReg.lastIndex = 0;
 	let queryExec = selectorGroupReg.exec(queryStr);
 
 	while (queryExec) {
-		console.log(queryExec);
-		groups.push(parseSelectorUnit(queryExec[1]));
+		const selectors = parseSelectorUnit(queryExec[1]);
+		groups.push(selectors);
 		queryStr = queryStr.slice(queryExec[0].length).trim();
+		if (!queryStr) {
+			return groups;
+		}
 		queryExec = selectorGroupReg.exec(queryStr);
 	}
-	return groups;
+	return [];
 };

@@ -145,6 +145,7 @@ export const matchSelector = (selector: ISelector, node: INode): boolean => {
 
 export const matchBySelectors = (selectorGroups: Array<ISelector[]>, node: INode) => selectorGroups.some(selectors => {
 	const selectorsLength = selectors.length;
+	if (!selectorsLength) return false;
 	if (!matchSelector(selectors[selectorsLength - 1], node)) return false;
 	let currentNode: INode = node;
 	let currentSelectorIndex = selectorsLength - 2;
