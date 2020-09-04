@@ -73,8 +73,8 @@ export class ParentNode extends Node implements IParentNode {
 
 		// DocumentFragment 需要特殊处理
 		if (childNode.nodeType === NodeType.DocumentFragment) {
-			const children = updateFragment(this, childNode as IDocumentFragment);
 			const pIndex = this.childNodes.indexOf(previousTarget);
+			const children = updateFragment(this, childNode as IDocumentFragment);
 			if (pIndex !== -1) {
 				this.childNodes.splice(pIndex, 0, ...children);
 			} else {
@@ -118,8 +118,8 @@ export class ParentNode extends Node implements IParentNode {
 
 		// DocumentFragment 需要特殊处理
 		if (newChild.nodeType === NodeType.DocumentFragment) {
-			const children = updateFragment(this, newChild as IDocumentFragment);
 			const oIndex = this.childNodes.indexOf(oldChild);
+			const children = updateFragment(this, newChild as IDocumentFragment);
 			if (oIndex !== -1) {
 				returnVal = oldChild;
 				this.childNodes.splice(oIndex, 1, ...children);
