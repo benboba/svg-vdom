@@ -143,7 +143,7 @@ export const matchSelector = (selector: ISelector, node: INode): boolean => {
 	return true;
 };
 
-export const matchBySelectors = (selectorGroups: Array<ISelector[]>, node: INode) => selectorGroups.some(selectors => {
+export const matchSelectors = (selectors: ISelector[], node: INode) => {
 	const selectorsLength = selectors.length;
 	if (!selectorsLength) return false;
 	if (!matchSelector(selectors[selectorsLength - 1], node)) return false;
@@ -165,8 +165,16 @@ export const matchBySelectors = (selectorGroups: Array<ISelector[]>, node: INode
 			case selectorUnitCombinator['+']:
 				if (currentNode.parentNode) {
 					const brothers = currentNode.parentNode.childNodes;
-					const nodeIndex = brothers.indexOf(currentNode);
-					if (nodeIndex <= 0 || !matchSelector(selectors[currentSelectorIndex], brothers[nodeIndex - 1])) {
+					let nodeIndex = brothers.indexOf(currentNode);
+					let brother: ITag | undefined;
+					while (nodeIndex > 0) {
+						if (brothers[nodeIndex - 1].nodeType === NodeType.Tag) {
+							brother = brothers[nodeIndex - 1] as ITag;
+							break;
+						}
+						nodeIndex--;
+					}
+					if (!brother || !matchSelector(selectors[currentSelectorIndex], brother)) {
 						return false;
 					}
 					currentNode = brothers[nodeIndex - 1];
@@ -181,12 +189,14 @@ export const matchBySelectors = (selectorGroups: Array<ISelector[]>, node: INode
 					if (index <= 0) {
 						return false;
 					}
-					let _brother: INode | undefined;
+					let _brother: ITag | undefined;
 					for (let bi = index; bi--;) {
-						_brother = _brothers[bi];
-						if (matchSelector(selectors[currentSelectorIndex], _brother)) {
-							currentNode = _brother;
-							break;
+						if (_brothers[bi].nodeType === NodeType.Tag) {
+							_brother = _brothers[bi] as ITag;
+							if (matchSelector(selectors[currentSelectorIndex], _brother)) {
+								currentNode = _brother;
+								break;
+							}
 						}
 					}
 					if (currentNode !== _brother) {
@@ -214,4 +224,6 @@ export const matchBySelectors = (selectorGroups: Array<ISelector[]>, node: INode
 		currentSelectorIndex--;
 	}
 	return true;
-});
+};
+
+export const matchSelectorGroups = (selectorGroups: ISelector[][], node: INode) => selectorGroups.some(selectors => matchSelectors(selectors, node));

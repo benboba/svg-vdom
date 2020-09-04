@@ -9,7 +9,7 @@ export interface IAttr {
 }
 
 export type TCheckFn = (n: INode) => boolean;
-export type TSelector = string | NodeType | TCheckFn | ISelector[][];
+export type TSelector = string | NodeType | TCheckFn | ISelector[][] | ISelector[] | ISelector;
 
 export interface INode {
 	nodeName: string;
@@ -19,6 +19,7 @@ export interface INode {
 
 	cloneNode(): INode;
 	remove(): boolean;
+	toString(): string;
 
 	closest(selector: TSelector): INode | null;
 	matches(selector: TSelector): boolean;

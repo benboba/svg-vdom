@@ -22,8 +22,8 @@ yarn add svg-vdom -D
 const svgVdom = require('svg-vdom');
 const vdom = svgVdom.parse(`<?xml version="1.0" encoding="UTF-8"?>
 	<svg width="42px" height="42px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-		<title>Group Copy 31</title>
-		<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+		<title>square</title>
+		<g id="Page-1" stroke="none" stroke-width="1" fill="currentColor" fill-rule="evenodd">
             <rect id="Rectangle-7" x="0" y="0" width="42" height="42"></rect>
 		</g>
     </svg>`);

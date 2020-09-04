@@ -7,6 +7,6 @@ export { TagNode } from './node/tag';
 export { ITextNodeOption, TextNode } from './node/text';
 export { parse } from './parse';
 export { attrModifier, selectorUnitCombinator } from './selectors/define';
-export { matchBySelectors, matchSelector } from './selectors/match';
+export { matchSelector, matchSelectorGroups, matchSelectors } from './selectors/match';
 export { parseSelector } from './selectors/parse';
 export { stringifyNode, stringifySVG, stringifyTag } from './stringify';

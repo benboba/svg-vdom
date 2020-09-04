@@ -3,7 +3,7 @@ import { ParentNode } from '../../src/node/parent';
 import { TagNode } from '../../src/node/tag';
 import { TextNode } from '../../src/node/text';
 
-test('节点', function() {
+test('节点', () => {
 	const dom = new ParentNode({
 		nodeName: '#document',
 		nodeType: NodeType.Document,

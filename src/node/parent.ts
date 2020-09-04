@@ -2,6 +2,7 @@ import { Node } from '.';
 import { IDocumentFragment, INode, IParentNode, ITextNode, TSelector } from '../../typings/node';
 import { parseSelector } from '../selectors/parse';
 import { getNodesByCondition } from '../utils/get-by-cond';
+import { updateFragment } from '../utils/update-fragment';
 import { NodeType } from './node-type';
 
 export interface IParentNodeOption {
@@ -38,19 +39,16 @@ export class ParentNode extends Node implements IParentNode {
 	 * @param childNode 要追加的节点
 	 */
 	appendChild(childNode: INode): boolean {
-		// DocumentFragment 需要特殊处理
-		if (childNode.nodeType === NodeType.DocumentFragment) {
-			(childNode as IDocumentFragment).childNodes.forEach(child => {
-				this.childNodes.push(child);
-				child.parentNode = this;
-			});
-			(childNode as IDocumentFragment).childNodes.length = 0;
-			return true;
-		}
-
 		// 自身/祖先元素不能被追加
 		if (this.closest(node => node === childNode)) {
 			return false;
+		}
+
+		// DocumentFragment 需要特殊处理
+		if (childNode.nodeType === NodeType.DocumentFragment) {
+			const children = updateFragment(this, childNode as IDocumentFragment);
+			this.childNodes.push(...children);
+			return true;
 		}
 
 		// 如果子节点原本有父节点，则先从原本的父节点中移除
@@ -68,31 +66,34 @@ export class ParentNode extends Node implements IParentNode {
 	 * @param previousTarget 插入到哪个子字节之前
 	 */
 	insertBefore(childNode: INode, previousTarget: INode): boolean {
-		const pIndex = this.childNodes.indexOf(previousTarget);
+		// 自身/祖先元素不能被追加
+		if (this.closest(node => node === childNode)) {
+			return false;
+		}
 
 		// DocumentFragment 需要特殊处理
 		if (childNode.nodeType === NodeType.DocumentFragment) {
-			const children = (childNode as IDocumentFragment).childNodes;
+			const children = updateFragment(this, childNode as IDocumentFragment);
+			const pIndex = this.childNodes.indexOf(previousTarget);
 			if (pIndex !== -1) {
 				this.childNodes.splice(pIndex, 0, ...children);
 			} else {
 				this.childNodes.push(...children);
 			}
-			children.forEach(child => {
-				child.parentNode = this;
-			});
-			(childNode as IDocumentFragment).childNodes.length = 0;
 			return true;
 		}
 
-		// 自身/祖先元素不能被追加
-		if (this.closest(node => node === childNode)) {
-			return false;
+		// 子元素自身插入到自身之前的问题
+		if (childNode === previousTarget && childNode.parentNode === this) {
+			return true;
 		}
+
 		// 如果子节点原本有父节点，则先从原本的父节点中移除
-		if (childNode.parentNode) {
-			childNode.parentNode.removeChild(childNode);
-		}
+		childNode.remove();
+
+		// pIndex 的获取要在 childNode 被移除之后，避免 childNode 就是当前节点的子节点，导致 pIndex 被意外更新
+		const pIndex = this.childNodes.indexOf(previousTarget);
+
 		// 判断目标节点是否在自己的子节点列表中，如果不在，直接插入
 		if (pIndex !== -1) {
 			this.childNodes.splice(pIndex, 0, childNode);
@@ -109,33 +110,36 @@ export class ParentNode extends Node implements IParentNode {
 	 * @param oldChild 要替换的旧节点
 	 */
 	replaceChild(newChild: INode, oldChild: INode): INode | null {
-		const oIndex = this.childNodes.indexOf(oldChild);
 		let returnVal: INode | null = null;
+		// 自身/祖先元素不能被追加
+		if (this.closest(node => node === newChild)) {
+			return returnVal;
+		}
 
 		// DocumentFragment 需要特殊处理
 		if (newChild.nodeType === NodeType.DocumentFragment) {
-			const children = (newChild as IDocumentFragment).childNodes;
+			const children = updateFragment(this, newChild as IDocumentFragment);
+			const oIndex = this.childNodes.indexOf(oldChild);
 			if (oIndex !== -1) {
 				returnVal = oldChild;
 				this.childNodes.splice(oIndex, 1, ...children);
 			} else {
 				this.childNodes.push(...children);
 			}
-			children.forEach(child => {
-				child.parentNode = this;
-			});
-			(newChild as IDocumentFragment).childNodes.length = 0;
 			return returnVal;
 		}
 
-		// 自身/祖先元素不能被追加
-		if (this.closest(node => node === newChild)) {
-			return returnVal;
+		// 子元素自身替换自身的问题
+		if (newChild === oldChild && newChild.parentNode === this) {
+			return oldChild;
 		}
+
 		// 先把要插入的子节点从原有父节点移除
-		if (newChild.parentNode) {
-			newChild.parentNode.removeChild(newChild);
-		}
+		newChild.remove();
+
+		// oIndex 的获取要在 newChild 被移除之后，避免 newChild 就是当前节点的子节点，导致 oIndex 被意外更新
+		const oIndex = this.childNodes.indexOf(oldChild);
+
 		// 指定父节点到自身
 		newChild.parentNode = this;
 		if (oIndex !== -1) {

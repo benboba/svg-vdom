@@ -1,6 +1,6 @@
-import { parse, ITag } from '../src';
+import { parse, ITag, selectorUnitCombinator } from '../src';
 
-test('real case', async function() {
+test('real case', async () => {
 	const dom = await parse(`<?xml version="1.0" encoding="UTF-8"?>
 	<svg width="42px" height="42px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<title>Group Copy 31</title>
@@ -21,4 +21,25 @@ test('real case', async function() {
 	expect(g[2].getAttribute('id')).toBe('Group-Copy-31');
 	const brothers = dom.querySelectorAll('title ~ #Page-1, g g rect + path');
 	expect(brothers.length).toBe(2);
+	const brother = dom.querySelector('title ~ #Page-1, g g rect + path');
+	expect(brother).toBe(dom.querySelector('#Page-1'));
+	expect(brother).toBe(dom.querySelector([{
+		type: 'title',
+		id: [],
+		class: [],
+		attr: [],
+		pseudo: [],
+		combinator: selectorUnitCombinator['+'],
+	}, {
+		id: ['Page-1'],
+		class: [],
+		attr: [],
+		pseudo: [],
+	}]));
+	expect(brother).toBe(dom.querySelectorAll({
+		id: ['Page-1'],
+		class: [],
+		attr: [],
+		pseudo: [],
+	})[0]);
 });

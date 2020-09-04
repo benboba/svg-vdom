@@ -1,6 +1,8 @@
+import { ISelector } from 'typings/style';
 import { INode, TSelector } from '../../typings/node';
-import { matchBySelectors } from '../selectors/match';
+import { matchSelector, matchSelectorGroups, matchSelectors } from '../selectors/match';
 import { parseSelector } from '../selectors/parse';
+import { stringifyNode } from '../stringify';
 
 interface INodeOption {
 	nodeName: INode['nodeName'];
@@ -52,7 +54,13 @@ export abstract class Node implements INode {
 
 		// 传入 css 选择器的情况
 		const selectorGroups = typeof selector === 'string' ? parseSelector(selector) : selector;
-		return matchBySelectors(selectorGroups, this);
+		if (Array.isArray(selectorGroups)) {
+			if (Array.isArray(selectorGroups[0])) {
+				return matchSelectorGroups(selectorGroups as ISelector[][], this);
+			}
+			return matchSelectors(selectorGroups as ISelector[], this);
+		}
+		return matchSelector(selectorGroups, this);
 	}
 
 	closest(selector: TSelector): INode | null {
@@ -66,5 +74,9 @@ export abstract class Node implements INode {
 			tag = tag.parentNode;
 		}
 		return null;
+	}
+
+	toString(): string {
+		return stringifyNode(this);
 	}
 }

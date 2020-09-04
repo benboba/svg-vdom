@@ -29,17 +29,17 @@ export class TagNode extends ParentNode implements ITag {
 
 	/**
 	 * 是否存在属性
-	 * @param name 属性名
-	 * @param namespace 属性命名空间
+	 * @param _name 属性名
+	 * @param _namespace 属性命名空间
 	 */
-	hasAttribute(name: string, namespace?: string): boolean {
-		for (const attr of this.attributes) {
+	hasAttribute(_name: string, _namespace?: string): boolean {
+		for (const { fullname, name, namespace } of this.attributes) {
 			if (!namespace) {
-				if (attr.fullname === name) {
+				if (fullname === _name) {
 					return true;
 				}
 			} else {
-				if (attr.name === name && attr.namespace === namespace) {
+				if (name === _name && namespace === _namespace) {
 					return true;
 				}
 			}
@@ -49,18 +49,18 @@ export class TagNode extends ParentNode implements ITag {
 
 	/**
 	 * 获取属性
-	 * @param name 属性名
-	 * @param namespace 属性命名空间
+	 * @param _name 属性名
+	 * @param _namespace 属性命名空间
 	 */
-	getAttribute(name: string, namespace?: string): string | null {
-		for (const attr of this.attributes) {
-			if (!namespace) {
-				if (attr.fullname === name) {
-					return attr.value;
+	getAttribute(_name: string, _namespace?: string): string | null {
+		for (const { name, value, fullname, namespace } of this.attributes) {
+			if (!_namespace) {
+				if (fullname === _name) {
+					return value;
 				}
 			} else {
-				if (attr.name === name && attr.namespace === namespace) {
-					return attr.value;
+				if (name === _name && namespace === _namespace) {
+					return value;
 				}
 			}
 		}

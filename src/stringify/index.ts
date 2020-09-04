@@ -1,4 +1,4 @@
-import { IDocument, INode, ITag, ITextNode } from '../../typings/node';
+import { IDocumentFragment, INode, IParentNode, ITag, ITextNode } from '../../typings/node';
 import { NodeType } from '../node/node-type';
 import { mixWhiteSpace } from '../utils/mix-white-space';
 
@@ -10,29 +10,31 @@ export const stringifyNode = (node: INode): string => {
 			xml += stringifyTag(node as ITag);
 			break;
 		case NodeType.Text:
-			xml += textContent;
+			xml += mixWhiteSpace(textContent);
 			break;
 		case NodeType.XMLDecl:
 			xml += `<?xml${mixWhiteSpace(` ${textContent}`).replace(/\s(?="|=|$)/g, '')}?>`;
 			break;
 		case NodeType.Comments: {
-			const comments = mixWhiteSpace(textContent as string).trim();
+			const comments = mixWhiteSpace(textContent).trim();
 			if (comments) {
 				xml += `<!--${comments}-->`;
 			}
 			break;
 		}
 		case NodeType.CDATA:
-			if (!(textContent as string).includes('<')) {
-				xml += textContent;
+			if (!textContent.includes('<')) {
+				xml += mixWhiteSpace(textContent);
 			} else {
-				xml += `<![CDATA[${textContent}]]>`;
+				xml += `<![CDATA[${mixWhiteSpace(textContent)}]]>`;
 			}
 			break;
 		case NodeType.DocType:
-			xml += `<!DOCTYPE${mixWhiteSpace(` ${(textContent as string).trim()}`)}>`;
+			xml += `<!DOCTYPE${mixWhiteSpace(` ${textContent.trim()}`)}>`;
 			break;
 		default:
+			// documentFragment
+			xml += stringifySVG(node as IDocumentFragment);
 			break;
 	}
 	return xml;
@@ -43,17 +45,16 @@ export const stringifyTag = (node: ITag): string => {
 	xml += `<${node.namespace ? `${node.namespace}:` : ''}${node.nodeName}`;
 	if (node.attributes.length) {
 		for (const { name, value, namespace } of node.attributes) {
-			if (value.trim()) {
-				xml += ` ${namespace ? `${namespace}:` : ''}${name}="${mixWhiteSpace(value.trim()).replace(/"/g, '&quot;')}"`;
+			const val = value.trim();
+			if (val) {
+				xml += ` ${namespace ? `${namespace}:` : ''}${name}="${mixWhiteSpace(val).replace(/"/g, '&quot;')}"`;
 			}
 		}
 	}
 
 	if (node.childNodes.length) {
 		xml += '>';
-		node.childNodes.forEach(childNode => {
-			xml += stringifyNode(childNode);
-		});
+		xml += stringifySVG(node);
 		xml += `</${node.namespace ? `${node.namespace}:` : ''}${node.nodeName}>`;
 	} else {
 		xml += '/>';
@@ -61,7 +62,7 @@ export const stringifyTag = (node: ITag): string => {
 	return xml;
 };
 
-export const stringifySVG = (dom?: IDocument | null): string => {
+export const stringifySVG = (dom?: IParentNode | null): string => {
 	if (!dom) return '';
 	return dom.childNodes.reduce((result, node) => `${result}${stringifyNode(node)}`, '');
 };
