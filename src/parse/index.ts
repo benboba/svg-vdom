@@ -1,5 +1,4 @@
-import { IDynamicObj } from '../../typings';
-import { IDocument, INode, IParentNode, ITag, ITextNode } from '../../typings/node';
+import { IDocument, INode, IParentNode, ITagNode, ITextNode } from '../../typings/node';
 import { NodeType } from '../node/node-type';
 import { ParentNode } from '../node/parent';
 import { TagNode } from '../node/tag';
@@ -7,6 +6,10 @@ import { TextNode } from '../node/text';
 import { collapseQuots } from '../utils/collapse-quots';
 import { mixWhiteSpace } from '../utils/mix-white-space';
 import { REG_ATTR, REG_CDATA_SECT, REG_COMMENTS, REG_DOCTYPE, REG_END_TAG, REG_START_TAG, REG_XML_DECL } from './regs';
+
+interface IUnique {
+	[attr: string]: boolean;
+}
 
 interface IStatus {
 	line: number;
@@ -96,7 +99,7 @@ const ProcessTag = (str: string, status: IStatus, lastIndex: number): ICurrent<I
 		REG_ATTR.lastIndex = 0;
 
 		let attrExec = REG_ATTR.exec(execResult[2]);
-		const attrUnique: IDynamicObj<boolean> = {};
+		const attrUnique: IUnique = {};
 		while (attrExec) {
 			updStatus(attrExec.index + execResult[1].length + 1, execResult[0], tempStatus);
 
@@ -109,12 +112,12 @@ const ProcessTag = (str: string, status: IStatus, lastIndex: number): ICurrent<I
 			if (attrExec[1].includes(':')) {
 				const attrName = attrExec[1].split(':');
 				if (attrName.length === 2 && attrName[0] && attrName[1]) {
-					(result.node as ITag).setAttribute(attrName[1], collapseQuots(attrExec[2]).trim(), attrName[0]);
+					(result.node as ITagNode).setAttribute(attrName[1], collapseQuots(attrExec[2]).trim(), attrName[0]);
 				} else {
 					throw new Error(`Wrong attribute name! At ${tempStatus.line + status.line - 1}:${tempStatus.line > 1 ? tempStatus.pos : status.pos + tempStatus.pos}`);
 				}
 			} else {
-				(result.node as ITag).setAttribute(attrExec[1], collapseQuots(attrExec[2]).trim());
+				(result.node as ITagNode).setAttribute(attrExec[1], collapseQuots(attrExec[2]).trim());
 			}
 			attrExec = REG_ATTR.exec(execResult[2]);
 		}
@@ -209,7 +212,7 @@ export const parse = async (str: string): Promise<IDocument> => {
 			nodeType: NodeType.Document,
 			nodeName: '#document',
 		}) as IDocument;
-		const stack: Array<IDocument | ITag> = [];
+		const stack: Array<IDocument | ITagNode> = [];
 		const status: IStatus = {
 			line: 1,
 			pos: 0,
@@ -241,7 +244,7 @@ export const parse = async (str: string): Promise<IDocument> => {
 		if (current.node.nodeType === NodeType.Tag) {
 			hasRoot = true;
 			if (!current.selfClose) {
-				stack.push(current.node as ITag);
+				stack.push(current.node as ITagNode);
 			}
 		}
 
@@ -300,7 +303,7 @@ export const parse = async (str: string): Promise<IDocument> => {
 						hasRoot = true;
 					}
 					if (!current.selfClose) {
-						stack.push(current.node as ITag);
+						stack.push(current.node as ITagNode);
 					}
 				}
 			}

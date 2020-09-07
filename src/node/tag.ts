@@ -1,17 +1,17 @@
-import { IAttr, ITag } from '../../typings/node';
+import { IAttr, ITagNode } from '../../typings/node';
 import { NodeType } from './node-type';
 import { IParentNodeOption, ParentNode } from './parent';
 
-export class TagNode extends ParentNode implements ITag {
+export class TagNode extends ParentNode implements ITagNode {
 	constructor(option: IParentNodeOption) {
 		super(option);
 		this.attributes = [];
 		this.childNodes = [];
 	}
 
-	nodeType: ITag['nodeType'] = NodeType.Tag;
-	attributes: ITag['attributes'];
-	childNodes: ITag['childNodes'];
+	nodeType: ITagNode['nodeType'] = NodeType.Tag;
+	attributes: ITagNode['attributes'];
+	childNodes: ITagNode['childNodes'];
 
 	/**
 	 * 复制自身，但是不复制节点树关系链

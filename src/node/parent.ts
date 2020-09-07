@@ -133,7 +133,6 @@ export class ParentNode extends Node implements IParentNode {
 		if (newChild === oldChild && newChild.parentNode === this) {
 			return oldChild;
 		}
-
 		// 先把要插入的子节点从原有父节点移除
 		newChild.remove();
 

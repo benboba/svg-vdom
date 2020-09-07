@@ -70,12 +70,27 @@ test('fragment', () => {
 	expect(_svg.replaceChild(fragment, tag)).toBe(tag);
 	expect(_svg.childNodes.length).toBe(2);
 	expect(_svg.replaceChild(tag, svg)).toBe(svg);
-	expect(_svg.replaceChild(svg, svg)).toBe(svg);
+	expect(_svg.replaceChild(tag, tag)).toBe(tag);
+	expect(_svg.replaceChild(svg, svg)).toBeNull;
+	expect(_svg.childNodes.length).toBe(3);
 
 	fragment.appendChild(svg);
+	expect(_svg.childNodes.length).toBe(2);
 	expect(_svg.replaceChild(fragment, svg)).toBe(null);
 	svg.remove();
 	expect(_svg.childNodes.includes(svg)).toBeFalsy;
 	expect(_svg.replaceChild(svg, svg)).toBe(null);
 	expect(_svg.childNodes.includes(svg)).toBeTruthy;
+	expect(_svg.childNodes.length).toBe(3);
+
+	fragment.appendChild(svg);
+	fragment.appendChild(tag);
+	expect(_svg.childNodes.length).toBe(1);
+	expect(_svg.insertBefore(fragment, frag)).toBeTruthy;
+	expect(_svg.childNodes.length).toBe(3);
+	expect(_svg.insertBefore(svg, svg)).toBeTruthy;
+	svg.remove();
+	expect(_svg.childNodes.length).toBe(2);
+	expect(_svg.insertBefore(svg, svg)).toBeTruthy;
+	expect(_svg.childNodes.length).toBe(3);
 });

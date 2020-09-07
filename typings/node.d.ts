@@ -51,11 +51,11 @@ export interface IDocumentFragment extends IParentNode {
 	cloneNode(): IDocumentFragment;
 }
 
-export interface ITag extends IParentNode {
+export interface ITagNode extends IParentNode {
 	nodeType: NodeType.Tag;
 	attributes: IAttr[];
 
-	cloneNode(): ITag;
+	cloneNode(): ITagNode;
 
 	hasAttribute(name: string, namespace?: string): boolean;
 	getAttribute(name: string, namespace?: string): string | null;

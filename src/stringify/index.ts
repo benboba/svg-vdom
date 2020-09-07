@@ -1,4 +1,4 @@
-import { IDocumentFragment, INode, IParentNode, ITag, ITextNode } from '../../typings/node';
+import { IDocumentFragment, INode, IParentNode, ITagNode, ITextNode, IDocument } from '../../typings/node';
 import { NodeType } from '../node/node-type';
 import { mixWhiteSpace } from '../utils/mix-white-space';
 
@@ -7,7 +7,7 @@ export const stringifyNode = (node: INode): string => {
 	const textContent = (node as ITextNode).textContent || '';
 	switch (node.nodeType) {
 		case NodeType.Tag:
-			xml += stringifyTag(node as ITag);
+			xml += stringifyTag(node as ITagNode);
 			break;
 		case NodeType.Text:
 			xml += mixWhiteSpace(textContent);
@@ -33,14 +33,14 @@ export const stringifyNode = (node: INode): string => {
 			xml += `<!DOCTYPE${mixWhiteSpace(` ${textContent.trim()}`)}>`;
 			break;
 		default:
-			// documentFragment
-			xml += stringifySVG(node as IDocumentFragment);
+			// document | documentFragment
+			xml += stringifySVG(node as IDocument | IDocumentFragment);
 			break;
 	}
 	return xml;
 };
 
-export const stringifyTag = (node: ITag): string => {
+export const stringifyTag = (node: ITagNode): string => {
 	let xml = '';
 	xml += `<${node.namespace ? `${node.namespace}:` : ''}${node.nodeName}`;
 	if (node.attributes.length) {

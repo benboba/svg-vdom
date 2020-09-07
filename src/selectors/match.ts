@@ -1,4 +1,4 @@
-import { INode, ITag } from '../../typings/node';
+import { INode, ITagNode } from '../../typings/node';
 import { ISelector } from '../../typings/style';
 import { NodeType } from '../node/node-type';
 import { attrModifier, selectorUnitCombinator, validPseudoClass, validPseudoElement } from './define';
@@ -6,7 +6,7 @@ import { attrModifier, selectorUnitCombinator, validPseudoClass, validPseudoElem
 // 验证 className
 const checkClass = (node: INode, selector: ISelector): boolean => {
 	if (node.nodeType !== NodeType.Tag) return false;
-	const classAttr = (node as ITag).getAttribute('class');
+	const classAttr = (node as ITagNode).getAttribute('class');
 	let classNames: string[] = [];
 	if (classAttr) {
 		classNames = classAttr.trim().split(/\s+/);
@@ -17,7 +17,7 @@ const checkClass = (node: INode, selector: ISelector): boolean => {
 // 验证 ID
 const checkID = (node: INode, selector: ISelector): boolean => {
 	if (node.nodeType !== NodeType.Tag) return false;
-	let id = (node as ITag).getAttribute('id');
+	let id = (node as ITagNode).getAttribute('id');
 	if (id) {
 		id = id.trim();
 	}
@@ -29,46 +29,47 @@ const checkAttr = (node: INode, selector: ISelector): boolean => {
 	if (node.nodeType !== NodeType.Tag) return false;
 	for (let ai = selector.attr.length; ai--;) {
 		const attrSelector = selector.attr[ai];
-		let attr = (node as ITag).getAttribute(attrSelector.key);
+		let attr = (node as ITagNode).getAttribute(attrSelector.key);
 		if (attr === null) {
 			return false;
 		} else if (attrSelector.value) {
 			// 属性值大小写不敏感
+			const value = attrSelector.value.trim().toLowerCase();
 			attr = attr.trim().toLowerCase();
 			switch (attrSelector.modifier) {
 				// 开始字符匹配
 				case attrModifier['^']:
-					if (attr.indexOf(attrSelector.value) !== 0) {
+					if (attr.indexOf(value) !== 0) {
 						return false;
 					}
 					break;
 				// 结尾字符匹配
 				case attrModifier['$']:
-					if (attr.lastIndexOf(attrSelector.value) !== attr.length - attrSelector.value.length) {
+					if (attr.lastIndexOf(value) !== attr.length - value.length) {
 						return false;
 					}
 					break;
 				// 空格分组字符匹配
 				case attrModifier['~']:
-					if (!attr.split(/\s+/).includes(attrSelector.value)) {
+					if (!attr.split(/\s+/).includes(value)) {
 						return false;
 					}
 					break;
 				// 前缀字符匹配
 				case attrModifier['|']:
-					if (attr !== attrSelector.value && attr.indexOf(`${attrSelector.value}-`) !== 0) {
+					if (attr !== value && attr.indexOf(`${value}-`) !== 0) {
 						return false;
 					}
 					break;
 				// 模糊匹配
 				case attrModifier['*']:
-					if (!attr.includes(attrSelector.value)) {
+					if (!attr.includes(value)) {
 						return false;
 					}
 					break;
 				// 默认全字匹配
 				default:
-					if (attr !== attrSelector.value) {
+					if (attr !== value) {
 						return false;
 					}
 					break;
@@ -95,7 +96,7 @@ const checkPseudo = (node: INode, selector: ISelector): boolean => {
 			if (node.nodeName === 'text') {
 				hasText = true;
 			} else {
-				if ((node as ITag).querySelector('text')) {
+				if ((node as ITagNode).querySelector('text')) {
 					hasText = true;
 				}
 			}
@@ -166,10 +167,10 @@ export const matchSelectors = (selectors: ISelector[], node: INode) => {
 				if (currentNode.parentNode) {
 					const brothers = currentNode.parentNode.childNodes;
 					let nodeIndex = brothers.indexOf(currentNode);
-					let brother: ITag | undefined;
+					let brother: ITagNode | undefined;
 					while (nodeIndex > 0) {
 						if (brothers[nodeIndex - 1].nodeType === NodeType.Tag) {
-							brother = brothers[nodeIndex - 1] as ITag;
+							brother = brothers[nodeIndex - 1] as ITagNode;
 							break;
 						}
 						nodeIndex--;
@@ -189,10 +190,10 @@ export const matchSelectors = (selectors: ISelector[], node: INode) => {
 					if (index <= 0) {
 						return false;
 					}
-					let _brother: ITag | undefined;
+					let _brother: ITagNode | undefined;
 					for (let bi = index; bi--;) {
 						if (_brothers[bi].nodeType === NodeType.Tag) {
-							_brother = _brothers[bi] as ITag;
+							_brother = _brothers[bi] as ITagNode;
 							if (matchSelector(selectors[currentSelectorIndex], _brother)) {
 								currentNode = _brother;
 								break;

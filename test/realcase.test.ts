@@ -1,4 +1,4 @@
-import { parse, ITag, selectorUnitCombinator } from '../src';
+import { parse, ITagNode, selectorUnitCombinator } from '../src';
 
 test('real case', async () => {
 	const dom = await parse(`<?xml version="1.0" encoding="UTF-8"?>
@@ -15,8 +15,8 @@ test('real case', async () => {
 	</svg>`);
 	expect(dom.childNodes.length).toBe(2);
 	expect(dom.querySelector('a')).toBeNull;
-	expect((dom.querySelector('title') as ITag).nodeName).toBe('title');
-	const g = dom.querySelectorAll('g') as ITag[];
+	expect((dom.querySelector('title') as ITagNode).nodeName).toBe('title');
+	const g = dom.querySelectorAll('g') as ITagNode[];
 	expect(g.length).toBe(3);
 	expect(g[2].getAttribute('id')).toBe('Group-Copy-31');
 	const brothers = dom.querySelectorAll('title ~ #Page-1, g g rect + path');
