@@ -1,4 +1,4 @@
-import { IParentNode, ITagNode, matchSelector, matchSelectors, NodeType, parse, parseSelector } from '../../src';
+import { IParentNode, ITagNode, matchSelector, matchSelectorGroups, matchSelectors, NodeType, parse, parseSelector } from '../../src';
 
 test('match selectors', async () => {
 	const dom = await parse(`<?xml version="1.0" encoding="UTF-8"?>
@@ -17,6 +17,7 @@ test('match selectors', async () => {
 	const svg = dom.childNodes[1] as IParentNode;
 	svg.remove();
 
+	expect(matchSelectorGroups([], svg)).toBeFalsy;
 	expect(matchSelectors([], svg)).toBeFalsy;
 
 	for (let i = svg.childNodes.length; i--;) {

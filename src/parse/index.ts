@@ -7,10 +7,6 @@ import { collapseQuots } from '../utils/collapse-quots';
 import { mixWhiteSpace } from '../utils/mix-white-space';
 import { REG_ATTR, REG_CDATA_SECT, REG_COMMENTS, REG_DOCTYPE, REG_END_TAG, REG_START_TAG, REG_XML_DECL } from './regs';
 
-interface IUnique {
-	[attr: string]: boolean;
-}
-
 interface IStatus {
 	line: number;
 	pos: number;
@@ -99,7 +95,7 @@ const ProcessTag = (str: string, status: IStatus, lastIndex: number): ICurrent<I
 		REG_ATTR.lastIndex = 0;
 
 		let attrExec = REG_ATTR.exec(execResult[2]);
-		const attrUnique: IUnique = {};
+		const attrUnique: Record<string, boolean> = {};
 		while (attrExec) {
 			updStatus(attrExec.index + execResult[1].length + 1, execResult[0], tempStatus);
 

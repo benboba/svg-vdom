@@ -1,14 +1,8 @@
 import { ISelector } from 'typings/style';
-import { INode, TSelector } from '../../typings/node';
+import { INode, INodeOption, TSelector } from '../../typings/node';
 import { matchSelector, matchSelectorGroups, matchSelectors } from '../selectors/match';
 import { parseSelector } from '../selectors/parse';
 import { stringifyNode } from '../stringify';
-
-interface INodeOption {
-	nodeName: INode['nodeName'];
-	nodeType: INode['nodeType'];
-	namespace?: INode['namespace'];
-}
 
 export abstract class Node implements INode {
 	constructor(option: INodeOption) {

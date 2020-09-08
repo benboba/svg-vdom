@@ -1,12 +1,5 @@
 import { Node } from '.';
-import { ITextNode } from '../../typings/node';
-
-export interface ITextNodeOption {
-	nodeName: ITextNode['nodeName'];
-	nodeType: ITextNode['nodeType'];
-	namespace?: ITextNode['namespace'];
-	textContent: ITextNode['textContent'];
-}
+import { ITextNode, ITextNodeOption } from '../../typings/node';
 
 export class TextNode extends Node implements ITextNode {
 	constructor(option: ITextNodeOption) {

@@ -37,7 +37,7 @@ test('节点', () => {
 	dom.appendChild(svg);
 	expect(dom.childNodes.length).toBe(4);
 	expect(dom.childNodes[3]).toBe(svg);
-	svg.remove();
+	dom.removeChild([svg, svg, svg]);
 	svg.remove();
 	expect(dom.childNodes.length).toBe(3);
 

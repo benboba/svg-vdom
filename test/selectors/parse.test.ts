@@ -1,5 +1,4 @@
-import { selectorUnitCombinator, attrModifier } from '../../src/selectors/define';
-import { parseSelector } from '../../src/selectors/parse';
+import { attrModifier, parseSelector, selectorUnitCombinator } from '../../src';
 
 test('simple parse', () => {
 	const parseResult = parseSelector('svg > g');

@@ -10,6 +10,8 @@ test('stringify', () => {
 		nodeType: NodeType.Document,
 	}) as IDocument;
 
+	expect(NodeType[dom.nodeType]).toBe('Document');
+
 	const xml = new TextNode({
 		nodeName: '#xml-decl',
 		nodeType: NodeType.XMLDecl,
@@ -22,8 +24,7 @@ test('stringify', () => {
 		textContent: '   x   ml   ',
 	});
 
-	dom.appendChild(xml);
-	dom.appendChild(doctype);
+	dom.appendChild([xml, doctype]);
 
 	const svg = new TagNode({
 		nodeName: 'svg',
@@ -42,8 +43,7 @@ test('stringify', () => {
 	expect(svg.getAttribute('width')).toBe('200');
 	svg.removeAttribute('href', 'xlink');
 	expect(svg.attributes.length).toBe(2);
-	dom.appendChild(svg);
-	dom.appendChild(svg.cloneNode());
+	dom.appendChild([svg, svg.cloneNode()]);
 
 	expect(stringifySVG(dom)).toBe('<?xml?><!DOCTYPE x ml><svg/><svg width="200" height="100"/><svg width="200" height="100"/>');
 	expect(stringifyTag(svg)).toBe('<svg width="200" height="100"/>');
@@ -62,17 +62,14 @@ test('stringify', () => {
 		nodeName: '#cdata',
 		textContent: '<ev  il>',
 	});
-	svg.appendChild(cdata);
-	svg.appendChild(cdata.cloneNode());
-	svg.appendChild(cdata.cloneNode());
+	svg.appendChild([cdata, cdata.cloneNode(), cdata.cloneNode()]);
 	cdata.textContent = 'angel';
 	const comment = new TextNode({
 		nodeType: NodeType.Comments,
 		nodeName: '#comment',
 		textContent: '   <just   so   so>   ',
 	});
-	svg.appendChild(comment);
-	svg.appendChild(comment.cloneNode());
+	svg.appendChild([comment, comment.cloneNode()]);
 	comment.textContent = '';
 	expect(stringifyTag(svg)).toBe('<svg width="200" height="100">abcdeangel<![CDATA[<ev il>]]><![CDATA[<ev il>]]><!--<just so so>--></svg>');
 

@@ -1,15 +1,9 @@
 import { Node } from '.';
-import { IDocumentFragment, INode, IParentNode, ITextNode, TSelector } from '../../typings/node';
+import { IDocumentFragment, INode, IParentNode, IParentNodeOption, ITextNode, TSelector } from '../../typings/node';
 import { parseSelector } from '../selectors/parse';
 import { getNodesByCondition } from '../utils/get-by-cond';
 import { updateFragment } from '../utils/update-fragment';
 import { NodeType } from './node-type';
-
-export interface IParentNodeOption {
-	nodeName: IParentNode['nodeName'];
-	nodeType: IParentNode['nodeType'];
-	namespace?: IParentNode['namespace'];
-}
 
 export class ParentNode extends Node implements IParentNode {
 	constructor(option: IParentNodeOption) {
@@ -38,7 +32,11 @@ export class ParentNode extends Node implements IParentNode {
 	 * 追加子节点
 	 * @param childNode 要追加的节点
 	 */
-	appendChild(childNode: INode): boolean {
+	appendChild(childNode: INode | INode[]): boolean {
+		if (Array.isArray(childNode)) {
+			return childNode.reduce((prev: boolean, child) => this.appendChild(child) && prev, true);
+		}
+
 		// 自身/祖先元素不能被追加
 		if (this.closest(node => node === childNode)) {
 			return false;
@@ -65,7 +63,11 @@ export class ParentNode extends Node implements IParentNode {
 	 * @param childNode 要插入的节点
 	 * @param previousTarget 插入到哪个子字节之前
 	 */
-	insertBefore(childNode: INode, previousTarget: INode): boolean {
+	insertBefore(childNode: INode | INode[], previousTarget: INode): boolean {
+		if (Array.isArray(childNode)) {
+			return childNode.reduce((prev: boolean, child) => this.insertBefore(child, previousTarget) && prev, true);
+		}
+
 		// 自身/祖先元素不能被追加
 		if (this.closest(node => node === childNode)) {
 			return false;
@@ -109,8 +111,49 @@ export class ParentNode extends Node implements IParentNode {
 	 * @param newChild 新的子节点
 	 * @param oldChild 要替换的旧节点
 	 */
-	replaceChild(newChild: INode, oldChild: INode): INode | null {
+	replaceChild(newChild: INode | INode[], oldChild: INode): INode | null {
 		let returnVal: INode | null = null;
+
+		if (Array.isArray(newChild)) {
+			const children = new Set<INode>();
+			// 用于标记是否存在自身替换自身的情况
+			let replaceSize = 1;
+			let oIndex = this.childNodes.indexOf(oldChild);
+			newChild.forEach(child => {
+				// 自身/祖先元素不能被追加
+				if (this.closest(node => node === child)) {
+					return;
+				}
+
+				if (child.nodeType === NodeType.DocumentFragment) {
+					updateFragment(this, child as IDocumentFragment).forEach(n => {
+						children.add(n);
+					});
+					return;
+				}
+
+				// 子元素自身替换自身的问题
+				if (child.parentNode === this) {
+					const cIndex = this.childNodes.indexOf(child);
+					if (cIndex !== -1 && cIndex < oIndex) {
+						oIndex--;
+					} else if (child === oldChild) {
+						replaceSize = 0;
+					}
+				}
+				child.remove();
+				child.parentNode = this;
+				children.add(child);
+			});
+			if (oIndex !== -1) {
+				returnVal = replaceSize ? oldChild : null;
+				this.childNodes.splice(oIndex, replaceSize, ...children);
+			} else {
+				this.childNodes.push(...children);
+			}
+			return returnVal;
+		}
+
 		// 自身/祖先元素不能被追加
 		if (this.closest(node => node === newChild)) {
 			return returnVal;
@@ -131,16 +174,17 @@ export class ParentNode extends Node implements IParentNode {
 
 		// 子元素自身替换自身的问题
 		if (newChild === oldChild && newChild.parentNode === this) {
-			return oldChild;
+			return null;
 		}
+
 		// 先把要插入的子节点从原有父节点移除
 		newChild.remove();
+		// 指定父节点到自身
+		newChild.parentNode = this;
 
 		// oIndex 的获取要在 newChild 被移除之后，避免 newChild 就是当前节点的子节点，导致 oIndex 被意外更新
 		const oIndex = this.childNodes.indexOf(oldChild);
 
-		// 指定父节点到自身
-		newChild.parentNode = this;
 		if (oIndex !== -1) {
 			returnVal = oldChild;
 			// 替换旧节点
@@ -157,7 +201,10 @@ export class ParentNode extends Node implements IParentNode {
 	 * 移除子节点
 	 * @param childNode 要移除的子节点
 	 */
-	removeChild(childNode: INode): boolean {
+	removeChild(childNode: INode | INode[]): boolean {
+		if (Array.isArray(childNode)) {
+			return childNode.reduce((prev: boolean, child) => this.removeChild(child) && prev, true);
+		}
 		const index = this.childNodes.indexOf(childNode);
 		if (index !== -1) {
 			this.childNodes.splice(index, 1);

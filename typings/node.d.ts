@@ -11,6 +11,21 @@ export interface IAttr {
 export type TCheckFn = (n: INode) => boolean;
 export type TSelector = string | NodeType | TCheckFn | ISelector[][] | ISelector[] | ISelector;
 
+export interface INodeOption {
+	nodeName: INode['nodeName'];
+	nodeType: INode['nodeType'];
+	namespace?: INode['namespace'];
+}
+
+export interface IParentNodeOption extends INodeOption {
+	nodeType: IParentNode['nodeType'];
+}
+
+export interface ITextNodeOption extends INodeOption {
+	nodeType: ITextNode['nodeType'];
+	textContent: ITextNode['textContent'];
+}
+
 export interface INode {
 	nodeName: string;
 	nodeType: NodeType;
@@ -31,10 +46,10 @@ export interface IParentNode extends INode {
 
 	cloneNode(): IParentNode;
 
-	appendChild(childNode: INode): boolean;
-	insertBefore(childNode: INode, previousTarget: INode): boolean;
-	replaceChild(newChild: INode, oldChild: INode): INode | null;
-	removeChild(childNode: INode): boolean;
+	appendChild(childNode: INode | INode[]): boolean;
+	insertBefore(childNode: INode | INode[], previousTarget: INode): boolean;
+	replaceChild(newChild: INode | INode[], oldChild: INode): INode | null;
+	removeChild(childNode: INode | INode[]): boolean;
 
 	querySelector(selector: TSelector): IParentNode | ITextNode | null;
 	querySelectorAll(selector: TSelector): INode[];
