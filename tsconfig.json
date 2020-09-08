@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"target": "es2019",
+		"module": "esnext",
+		"moduleResolution": "node",
+		"baseUrl": ".",
+		"strict": true,
+		"allowSyntheticDefaultImports": true,
+		"declaration": true
+	},
+	"include": [
+		"src/**/*",
+		"test/**/*",
+		"typings/*"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}
