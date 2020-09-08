@@ -1,0 +1,43 @@
+{
+  "name": "svg-vdom",
+  "version": "1.0.0",
+  "description": "parse svg string and use it like dom",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "keywords": [
+    "svg",
+    "virtual dom",
+    "parser",
+    "parse",
+    "stringify"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && rollup -c",
+    "lint": "eslint --ext .ts ./src",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benboba/svg-vdom.git"
+  },
+  "author": "Wang Feng <benboba@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/benboba/svg-vdom/issues"
+  },
+  "homepage": "https://github.com/benboba/svg-vdom#readme",
+  "devDependencies": {
+    "@types/jest": "^26.0.10",
+    "@types/node": "^14.6.2",
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
+    "eslint": "^7.7.0",
+    "jest": "^26.4.2",
+    "rollup": "^2.26.8",
+    "rollup-plugin-typescript2": "^0.27.2",
+    "ts-jest": "^26.3.0",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.2"
+  },
+  "dependencies": {}
+}
