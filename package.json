@@ -1,9 +1,10 @@
 {
   "name": "svg-vdom",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "parse svg string and use it like dom",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "keywords": [
     "svg",
     "virtual dom",
