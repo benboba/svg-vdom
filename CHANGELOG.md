@@ -1,3 +1,9 @@
+# 2020-09-08 v1.0.2
+
+## Fixed bugs
+
+- Remove the dependency of the files in the typings directory on the src directory
+
 # 2020-09-08 v1.0.1
 
 ## Fixed bugs

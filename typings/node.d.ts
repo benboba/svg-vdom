@@ -1,5 +1,15 @@
-import { NodeType } from '../src/node/node-type';
 import { ISelector } from './style';
+
+declare enum NodeType {
+	Tag = 1,
+	Text = 3,
+	CDATA = 4,
+	XMLDecl = 7,
+	Comments = 8,
+	Document = 9,
+	DocType = 10,
+	DocumentFragment = 11,
+}
 
 export interface IAttr {
 	name: string;
