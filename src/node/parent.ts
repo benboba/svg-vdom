@@ -119,8 +119,7 @@ export class ParentNode extends Node implements IParentNode {
 			// 用于标记是否存在自身替换自身的情况
 			let replaceSize = 1;
 			let oIndex = this.childNodes.indexOf(oldChild);
-			const newChildren = [...newChild];
-			newChildren.forEach(child => {
+			[...newChild].forEach(child => {
 				// 自身/祖先元素不能被追加
 				if (this.closest(node => node === child)) {
 					return;
