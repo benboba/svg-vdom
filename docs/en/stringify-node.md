@@ -1,6 +1,6 @@
 # stringifyNode(node: INode)
 
-将任意节点字符串化
+Stringize any node
 
 ## Parameters
 

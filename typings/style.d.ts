@@ -1,23 +1,7 @@
-// 选择器混合字符，不含后代选择器（空格）
-declare enum selectorUnitCombinator {
-	'>' = 1,
-	'+',
-	'~',
-}
-
-// 属性选择器等号修饰符
-declare enum attrModifier {
-	'^' = 1,
-	'$',
-	'~',
-	'|',
-	'*',
-}
-
 // 属性选择器接口定义
 export interface IAttrSelector {
 	key: string;
-	modifier?: attrModifier;
+	modifier?: 1 | 2 | 3 | 4 | 5;
 	value?: string;
 }
 
@@ -36,5 +20,5 @@ export interface ISelector {
 	class: string[];
 	attr: IAttrSelector[];
 	pseudo: IPseudo[];
-	combinator?: selectorUnitCombinator;
+	combinator?: 1 | 2 | 3;
 }

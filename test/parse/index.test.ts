@@ -1,4 +1,5 @@
 import { parse } from '../../src/parse';
+import { ITagNode, ITextNode } from '../../src';
 
 test('xml声明必须在最前面', () => {
 	parse(' <?xml version="1.1" ?><svg/>').catch(err => {
@@ -95,4 +96,9 @@ test('namespace', async () => {
 	const dom = await parse('<xml:svg></xml:svg>');
 	expect(dom.childNodes.length).toBe(1);
 	expect(dom.childNodes[0].namespace).toBe('xml');
+});
+
+test('textContent', async () => {
+	const dom = await parse('<svg><![CDATA[123]]></svg>');
+	expect(((dom.childNodes[0] as ITagNode).childNodes[0] as ITextNode).textContent).toBe('123');
 });

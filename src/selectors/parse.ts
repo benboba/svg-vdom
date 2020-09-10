@@ -42,7 +42,7 @@ const parseSelectorUnit = (selector: string): ISelector[] => {
 							if (typeof attrModifier[attrStr[eqIndex - 1] as keyof typeof attrModifier] === 'number') {
 								selectorUnit.attr.push({
 									key: attrStr.slice(0, eqIndex - 1),
-									modifier: attrModifier[attrStr[eqIndex - 1] as keyof typeof attrModifier] as number,
+									modifier: attrModifier[attrStr[eqIndex - 1] as keyof typeof attrModifier],
 									value: attrStr.slice(eqIndex + 1),
 								});
 							} else {
@@ -84,7 +84,7 @@ const parseSelectorUnit = (selector: string): ISelector[] => {
 		if (selectorExec[3]) {
 			const combinator = selectorExec[3].trim();
 			if (typeof selectorUnitCombinator[combinator as keyof typeof selectorUnitCombinator] === 'number') {
-				selectorUnit.combinator = selectorUnitCombinator[combinator as keyof typeof selectorUnitCombinator] as number;
+				selectorUnit.combinator = selectorUnitCombinator[combinator as keyof typeof selectorUnitCombinator];
 			}
 		}
 		selectors.push(selectorUnit);
