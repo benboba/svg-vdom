@@ -42,6 +42,7 @@ Returns a boolean value indicating whether the insertion is successful
 
 - If the insert is DocumentFragment, all the child nodes of DocumentFragment will be inserted instead, and the list of child nodes of DocumentFragment will be cleared
 - If you try to insert the node itself or an ancestor node, it will return false
+- If childNode is an array of nodes, as long as any one of the nodes is not successfully inserted, it will return false
 - If you insert an existing child node, the position of the child node will be changed
 
 ## ParentNode.prototype.insertBefore(childNode: INode | INode[], previousTarget: INode)
@@ -63,6 +64,7 @@ Returns a boolean value indicating whether the insertion is successful
 
 - If the insert is DocumentFragment, all the child nodes of DocumentFragment will be inserted instead, and the list of child nodes of DocumentFragment will be cleared
 - If you try to insert the node itself or an ancestor node, it will return false
+- If childNode is an array of nodes, as long as any one of the nodes is not successfully inserted, it will return false
 - If you insert an existing child node, the position of the child node will be changed
 - If previousTarget is not a child of the current node, it will be inserted at the end of the current node list
 
@@ -106,6 +108,7 @@ Returns a boolean value indicating whether childNode was successfully removed
 ### Remarks
 
 - If childNode is not a child node of the current node, it will not be removed and will return false
+- If childNode is an array of nodes, as long as any one of the nodes is not successfully removed, it will return false
 
 ## ParentNode.prototype.querySelector(selector: TSelector)
 

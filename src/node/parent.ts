@@ -34,7 +34,7 @@ export class ParentNode extends Node implements IParentNode {
 	 */
 	appendChild(childNode: INode | INode[]): boolean {
 		if (Array.isArray(childNode)) {
-			return childNode.reduce((prev: boolean, child) => this.appendChild(child) && prev, true);
+			return [...childNode].reduce((prev: boolean, child) => this.appendChild(child) && prev, true);
 		}
 
 		// 自身/祖先元素不能被追加
@@ -65,7 +65,7 @@ export class ParentNode extends Node implements IParentNode {
 	 */
 	insertBefore(childNode: INode | INode[], previousTarget: INode): boolean {
 		if (Array.isArray(childNode)) {
-			return childNode.reduce((prev: boolean, child) => this.insertBefore(child, previousTarget) && prev, true);
+			return [...childNode].reduce((prev: boolean, child) => this.insertBefore(child, previousTarget) && prev, true);
 		}
 
 		// 自身/祖先元素不能被追加
@@ -119,7 +119,8 @@ export class ParentNode extends Node implements IParentNode {
 			// 用于标记是否存在自身替换自身的情况
 			let replaceSize = 1;
 			let oIndex = this.childNodes.indexOf(oldChild);
-			newChild.forEach(child => {
+			const newChildren = [...newChild];
+			newChildren.forEach(child => {
 				// 自身/祖先元素不能被追加
 				if (this.closest(node => node === child)) {
 					return;
@@ -203,7 +204,7 @@ export class ParentNode extends Node implements IParentNode {
 	 */
 	removeChild(childNode: INode | INode[]): boolean {
 		if (Array.isArray(childNode)) {
-			return childNode.reduce((prev: boolean, child) => this.removeChild(child) && prev, true);
+			return [...childNode].reduce((prev: boolean, child) => this.removeChild(child) && prev, true);
 		}
 		const index = this.childNodes.indexOf(childNode);
 		if (index !== -1) {

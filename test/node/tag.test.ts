@@ -10,6 +10,7 @@ test('标签', () => {
 	expect(svg.hasAttribute('href')).toBeFalsy;
 	expect(svg.hasAttribute('xlink:href')).toBeTruthy;
 	expect(svg.hasAttribute('href', 'xlink')).toBeTruthy;
+	expect(svg.hasAttribute('href', 'xml')).toBeFalsy;
 
 	expect(svg.getAttribute('xlink', 'href')).toBeNull;
 	expect(svg.getAttribute('href', 'xlink')).toBe('test');
