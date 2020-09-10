@@ -56,14 +56,15 @@ test('fragment', () => {
 	fragment.appendChild(svg);
 	fragment.insertBefore(frag, svg);
 	expect(frag.childNodes.length).toBe(0);
-	expect(fragment.childNodes[0]).toBe(tag);
-	expect(fragment.childNodes[1]).toBe(text);
-	expect(fragment.childNodes[2]).toBe(svg);
+	expect(fragment.childNodes[0].nodeName).toBe('tag');
+	expect(fragment.childNodes[1].nodeName).toBe('#text');
+	expect(fragment.childNodes[2].nodeName).toBe('svg');
 
 	expect(fragment.insertBefore([fragment], frag)).toBeFalsy;
 	expect(fragment.replaceChild([fragment], frag)).toBeNull;
 
 	const _svg = svg.cloneNode();
+	_svg.nodeName = '_svg';
 	_svg.appendChild(svg);
 	expect(_svg.replaceChild(tag, svg)).toBe(svg);
 	expect(_svg.childNodes[0]).toBe(tag);
@@ -102,8 +103,21 @@ test('fragment', () => {
 	expect(_svg.insertBefore(svg, svg)).toBeTruthy;
 	fragment.appendChild([svg, tag]);
 	expect(_svg.insertBefore([svg, tag], svg)).toBeTruthy;
-	svg.remove();
+	expect(svg.remove()).toBeTruthy;
 	expect(_svg.childNodes.length).toBe(2);
 	expect(_svg.insertBefore(svg, svg)).toBeTruthy;
 	expect(_svg.childNodes.length).toBe(3);
+
+	expect(svg.remove()).toBeTruthy;
+	svg.childNodes.length = 0;
+	svg.appendChild(_svg);
+	expect(svg.childNodes.length).toBe(1);
+	expect(_svg.childNodes.length).toBe(2);
+	svg.replaceChild(_svg.childNodes, _svg);
+	expect(svg.childNodes.length).toBe(2);
+	expect(_svg.appendChild(svg.childNodes)).toBeTruthy
+	expect(svg.childNodes.length).toBe(0);
+	expect(_svg.childNodes.length).toBe(2);
+	expect(_svg.removeChild(_svg.childNodes)).toBeTruthy;
+	expect(_svg.childNodes.length).toBe(0);
 });

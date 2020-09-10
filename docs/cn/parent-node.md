@@ -42,6 +42,7 @@ childNode | [INode](types.md#inode)/INode[] | 要插入的子节点/子节点列
 
 - 如果插入的是 DocumentFragment，会改为插入 DocumentFragment 的全部子节点，并将 DocumentFragment 的子节点列表清空
 - 如果试图插入节点自身或祖先节点，会返回 false
+- 如果 childNode 是节点数组，只要其中任何一个节点没有被成功插入，都会返回 false
 - 如果插入的是已有的子节点，会改变该子节点的位置
 
 ## ParentNode.prototype.insertBefore(childNode: INode | INode[], previousTarget: INode)
@@ -63,6 +64,7 @@ previousTarget | [INode](types.md#inode) | 要插入到哪个子节点之前 | �
 
 - 如果插入的是 DocumentFragment，会改为插入 DocumentFragment 的全部子节点，并将 DocumentFragment 的子节点列表清空
 - 如果试图插入节点自身或祖先节点，会返回 false
+- 如果 childNode 是节点数组，只要其中任何一个节点没有被成功插入，都会返回 false
 - 如果插入的是已有的子节点，会改变该子节点的位置
 - previousTarget 不是当前节点的子节点，会插入到当前节点列表的末尾
 
@@ -106,6 +108,7 @@ childNode | [INode](types.md#inode)/INode[] | 要移除的子节点/子节点列
 ### 备注
 
 - 如果 childNode 不是当前节点的子节点，它不会被移除，同时会返回 false
+- 如果 childNode 是节点数组，只要其中任何一个节点没有被成功移除，都会返回 false
 
 ## ParentNode.prototype.querySelector(selector: TSelector)
 

@@ -32,7 +32,7 @@ export class TagNode extends ParentNode implements ITagNode {
 	 */
 	hasAttribute(_name: string, _namespace?: string): boolean {
 		for (const { fullname, name, namespace } of this.attributes) {
-			if (!namespace) {
+			if (!_namespace) {
 				if (fullname === _name) {
 					return true;
 				}
@@ -100,19 +100,19 @@ export class TagNode extends ParentNode implements ITagNode {
 
 	/**
 	 * 移除属性
-	 * @param name 属性名
-	 * @param namespace 属性命名空间
+	 * @param _name 属性名
+	 * @param _namespace 属性命名空间
 	 */
-	removeAttribute(name: string, namespace?: string): boolean {
+	removeAttribute(_name: string, _namespace?: string): boolean {
 		for (let i = this.attributes.length; i--;) {
-			const attr = this.attributes[i];
-			if (!namespace) {
-				if (attr.fullname === name) {
+			const { fullname, name, namespace } = this.attributes[i];
+			if (!_namespace) {
+				if (fullname === _name) {
 					this.attributes.splice(i, 1);
 					return true;
 				}
 			} else {
-				if (attr.name === name && attr.namespace === namespace) {
+				if (name === _name && namespace === _namespace) {
 					this.attributes.splice(i, 1);
 					return true;
 				}

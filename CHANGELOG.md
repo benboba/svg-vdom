@@ -1,10 +1,18 @@
+# 2020-09-10 v1.0.4
+
+## Fixed bugs
+
+- Fix a misjudgment of the hasAttribute method of the tag node for attributes containing namespace
+- Complete the description of the parentNode documentation for array parameters
+- Modified the method of parentNode operating child nodes to avoid directly passing in childNodes of a node to cause the result to not meet expectations
+
 # 2020-09-10 v1.0.3
 
 ## Breaking change
 
 - The "name" in umd format is changed from "xml-parser" to "svgVdom"
 
-## 修复问题
+## Fixed bugs
 
 - Fix the format problem of attrModifier description document in docs
 - Fix the problem that the entire node will be put into textContent when parsing text nodes
