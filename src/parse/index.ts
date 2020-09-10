@@ -54,7 +54,7 @@ const ProcessTagLess = ([name, reg, type]: typeof configs[0], str: string, lastI
 			node: new TextNode({
 				nodeType: type,
 				nodeName: `#${name}`,
-				textContent: execResult[0],
+				textContent: execResult[1],
 			}),
 			lastIndex: reg.lastIndex,
 		} as ICurrent<ITextNode>;

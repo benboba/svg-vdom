@@ -1,3 +1,14 @@
+# 2020-09-10 v1.0.3
+
+## Breaking change
+
+- The "name" in umd format is changed from "xml-parser" to "svgVdom"
+
+## 修复问题
+
+- Fix the format problem of attrModifier description document in docs
+- Fix the problem that the entire node will be put into textContent when parsing text nodes
+
 # 2020-09-08 v1.0.2
 
 ## Fixed bugs

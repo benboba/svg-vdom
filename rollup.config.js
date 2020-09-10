@@ -11,7 +11,7 @@ export default {
         {
             file: pkg.main,
             format: 'umd',
-            name: 'xml-parser',
+            name: 'svgVdom',
         },
     ],
     plugins: [typescript()],
