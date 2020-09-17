@@ -236,6 +236,9 @@ export const parse = async (str: string): Promise<IDocument> => {
 		if (current.node.nodeType === -1) {
 			reject(new Error(`The start and end tags cannot match! At ${status.line}:${status.pos}`));
 		}
+		if (current.node.nodeType === NodeType.CDATA) {
+			reject(new Error(`Invalid CDATA element! At ${status.line}:${status.pos}`));
+		}
 		doc.appendChild(current.node as INode);
 		if (current.node.nodeType === NodeType.Tag) {
 			hasRoot = true;
@@ -275,11 +278,14 @@ export const parse = async (str: string): Promise<IDocument> => {
 
 
 			} else {
-
 				if (stackLen) {
 					// 插入子节点
 					stack[stackLen - 1].appendChild(current.node as INode);
-				} else if ((current.node as ITextNode).textContent) {
+				} else if ((current.node as INode).nodeType === NodeType.CDATA) {
+					// CDATA 节点禁止出现在根下
+					reject(new Error(`Invalid CDATA element! At ${status.line}:${status.pos}`));
+					return;
+				} else if ((current.node as INode).nodeType === NodeType.Text) {
 					// 没有节点而出现了非空文本节点
 					if ((current.node as ITextNode).textContent.trim()) {
 						reject(new Error(`Unexpected text node! At ${status.line}:${status.pos}`));

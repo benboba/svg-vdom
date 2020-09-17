@@ -1,3 +1,14 @@
+# 2020-09-10 v1.0.6
+
+## Features
+
+- Added judgment and error prompts that CDATA interruption cannot appear under the document root
+
+## Fixed bugs
+
+- Fixed the bug that accidentally reported an error when encountering the comment node under the document root
+- Found and solved the problem that the test case with the parsing error did not take effect
+
 # 2020-09-10 v1.0.4 & 1.0.5
 
 ## Fixed bugs
