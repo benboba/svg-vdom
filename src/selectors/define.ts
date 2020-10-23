@@ -22,5 +22,5 @@ export const classChar = '\\.[^#\\.\\[\\*:\\s,]+';
 export const attrChar = '\\[[a-zA-Z][a-zA-Z0-9\\-]*(?:[\\|\\^\\$\\*~]?=(?:\'[^\']*\'|"[^"]*"|[^\'"\\]]+))?\\]';
 export const pseudoChar = '\\:{1,2}[a-zA-Z-]+(?:\\((?:[^\\)]+|[^\\(]+\\([^\\)]+\\))\\))?';
 
-export const validPseudoClass = ['hover', 'link', 'active', 'visited', 'focus', 'first-child', 'lang', 'not'];
-export const validPseudoElement = ['first-letter', 'first-line'];
+export const validPseudoClass = ['hover', 'link', 'active', 'visited', 'focus', 'first-child', 'lang', 'not', 'root'];
+export const validPseudoElement = ['first-letter', 'first-line', 'selection'];
