@@ -1,3 +1,9 @@
+# 2020-10-23 v1.0.7
+
+## Features
+
+-Added support for :root and ::selection to the pseudo-class/pseudo-element selector
+
 # 2020-09-10 v1.0.6
 
 ## Features
