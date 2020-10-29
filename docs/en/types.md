@@ -62,6 +62,8 @@ type TSelector =
     | ISelector; // Use CSS selector unit to validate
 ```
 
+The string type allows to start with ">"
+
 ## IAttr
 
 Properties of label nodes

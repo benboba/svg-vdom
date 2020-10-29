@@ -1,3 +1,10 @@
+# 2020-10-29 v1.0.8
+
+## Features
+
+- selector string is now allowed to start with ">"
+- Now matchSelector no longer restricts pseudo-classes and only verifies pseudo-elements
+
 # 2020-10-23 v1.0.7
 
 ## Features
