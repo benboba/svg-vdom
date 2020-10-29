@@ -62,6 +62,8 @@ type TSelector =
     | ISelector; // 使用 CSS 选择器单元验证
 ```
 
+其中 string 类型允许以 “>” 开始
+
 ## IAttr
 
 标签类节点的属性
