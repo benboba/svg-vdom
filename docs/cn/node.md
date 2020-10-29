@@ -44,7 +44,7 @@ option | [INodeOption](types.md#inodeoption) | 配置项 | √ | --
 
 返回一个布尔值，表示是否成功移除
 
-## Node.prototype.matches(selector: TSelector)
+## Node.prototype.matches(selector: TSelector[, finder: IParentNode])
 
 验证当前节点是否符合指定的判断条件
 
@@ -53,6 +53,9 @@ option | [INodeOption](types.md#inodeoption) | 配置项 | √ | --
 名称 | 类型 | 说明 | 必须 | 默认值
 ---- | ---- | ---- | ---- | ----
 selector | [TSelector](types.md#tselector) | 判断条件 | √ | --
+finder | [IParentNode](types.md#iparentnode) | 查找者 | × | --
+
+查找者用于 selector 以 “>” 开始的情况，表示选择器命中的最顶层元素，必须是查找者的子元素
 
 ### 返回值
 

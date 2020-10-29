@@ -20,5 +20,5 @@ export interface ISelector {
 	class: string[];
 	attr: IAttrSelector[];
 	pseudo: IPseudo[];
-	combinator?: 1 | 2 | 3;
+	combinator?: 1 | 2 | 3 | 4;
 }

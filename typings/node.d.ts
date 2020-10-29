@@ -47,7 +47,7 @@ export interface INode {
 	toString(): string;
 
 	closest(selector: TSelector): INode | null;
-	matches(selector: TSelector): boolean;
+	matches(selector: TSelector, finder?: IParentNode): boolean;
 }
 
 export interface IParentNode extends INode {
