@@ -91,7 +91,7 @@ interface INode {
 	toString(): string; // 字符串化
 
 	closest(selector: TSelector): INode | null; // 查找最近的符合条件的祖先节点（含自身）
-	matches(selector: TSelector): boolean; // 判断自身是否符合条件
+	matches(selector: TSelector, finder?: IParentNode): boolean; // 判断自身是否符合条件
 }
 ```
 

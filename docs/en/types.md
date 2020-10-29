@@ -91,7 +91,7 @@ interface INode {
 	toString(): string; // Stringified
 
 	closest(selector: TSelector): INode | null; // Find the nearest eligible ancestor node (including itself)
-	matches(selector: TSelector): boolean; // Determine whether the current node meets the conditions
+	matches(selector: TSelector, finder?: IParentNode): boolean; // Determine whether the current node meets the conditions
 }
 ```
 

@@ -2,7 +2,7 @@
 
 ## Features
 
--Added support for :root and ::selection to the pseudo-class/pseudo-element selector
+- Added support for :root and ::selection to the pseudo-class/pseudo-element selector
 
 # 2020-09-10 v1.0.6
 

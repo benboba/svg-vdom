@@ -1,7 +1,7 @@
-import { INode, ITagNode } from '../../typings/node';
+import { INode, IParentNode, ITagNode } from '../../typings/node';
 import { ISelector } from '../../typings/style';
 import { NodeType } from '../node/node-type';
-import { attrModifier, selectorUnitCombinator, validPseudoClass, validPseudoElement } from './define';
+import { attrModifier, selectorUnitCombinator, validPseudoElement } from './define';
 
 // 验证 className
 const checkClass = (node: INode, selector: ISelector): boolean => {
@@ -80,17 +80,12 @@ const checkAttr = (node: INode, selector: ISelector): boolean => {
 };
 
 // 验证伪类和伪元素
-// 根据 SVG 标准只验证 CSS 2.1 规范的伪类和伪元素
-// https://www.w3.org/TR/SVG2/styling.html#RequiredCSSFeatures
+// 所有伪类默认可以通过验证，伪元素必须在特定列表里
 const checkPseudo = (node: INode, selector: ISelector): boolean => {
 	if (node.nodeType !== NodeType.Tag) return false;
 	for (let pi = selector.pseudo.length; pi--;) {
 		const pseudoSelector = selector.pseudo[pi];
-		if (!validPseudoClass.includes(pseudoSelector.func) && !validPseudoElement.includes(pseudoSelector.func)) {
-			return false;
-		}
-
-		// 命中伪元素，需要验证作用域链上是否存在文本节点 text
+		// 只在命中特定的伪元素时，验证作用域链上是否存在文本节点 text
 		if (validPseudoElement.includes(pseudoSelector.func)) {
 			let hasText = false;
 			if (node.nodeName === 'text') {
@@ -103,6 +98,8 @@ const checkPseudo = (node: INode, selector: ISelector): boolean => {
 			if (!hasText) {
 				return false;
 			}
+		} else if (!pseudoSelector.isClass) {
+			return false;
 		}
 	}
 	return true;
@@ -144,7 +141,7 @@ export const matchSelector = (selector: ISelector, node: INode): boolean => {
 	return true;
 };
 
-export const matchSelectors = (selectors: ISelector[], node: INode) => {
+export const matchSelectors = (selectors: ISelector[], node: INode, finder?: IParentNode) => {
 	const selectorsLength = selectors.length;
 	if (!selectorsLength) return false;
 	if (!matchSelector(selectors[selectorsLength - 1], node)) return false;
@@ -152,6 +149,12 @@ export const matchSelectors = (selectors: ISelector[], node: INode) => {
 	let currentSelectorIndex = selectorsLength - 2;
 	while (currentSelectorIndex >= 0) {
 		switch (selectors[currentSelectorIndex].combinator) {
+			// finder 的子元素
+			case selectorUnitCombinator['&>']:
+				if (currentNode.parentNode === finder) {
+					break;
+				}
+				return false;
 			// 子选择器
 			case selectorUnitCombinator['>']:
 				if (currentNode.parentNode) {
@@ -227,4 +230,4 @@ export const matchSelectors = (selectors: ISelector[], node: INode) => {
 	return true;
 };
 
-export const matchSelectorGroups = (selectorGroups: ISelector[][], node: INode) => selectorGroups.some(selectors => matchSelectors(selectors, node));
+export const matchSelectorGroups = (selectorGroups: ISelector[][], node: INode, finder?: IParentNode) => selectorGroups.some(selectors => matchSelectors(selectors, node, finder));

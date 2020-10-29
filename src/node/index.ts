@@ -1,5 +1,5 @@
 import { ISelector } from 'typings/style';
-import { INode, INodeOption, TSelector } from '../../typings/node';
+import { INode, INodeOption, IParentNode, TSelector } from '../../typings/node';
 import { matchSelector, matchSelectorGroups, matchSelectors } from '../selectors/match';
 import { parseSelector } from '../selectors/parse';
 import { stringifyNode } from '../stringify';
@@ -35,7 +35,7 @@ export abstract class Node implements INode {
 	 * 验证当前节点是否符合指定条件
 	 * @param selector 处理函数 / 节点类型 / css 选择器
 	 */
-	matches(selector: TSelector): boolean {
+	matches(selector: TSelector, finder?: IParentNode): boolean {
 		// 传入处理函数的情况
 		if (typeof selector === 'function') {
 			return selector(this);
@@ -50,9 +50,9 @@ export abstract class Node implements INode {
 		const selectorGroups = typeof selector === 'string' ? parseSelector(selector) : selector;
 		if (Array.isArray(selectorGroups)) {
 			if (Array.isArray(selectorGroups[0])) {
-				return matchSelectorGroups(selectorGroups as ISelector[][], this);
+				return matchSelectorGroups(selectorGroups as ISelector[][], this, finder);
 			}
-			return matchSelectors(selectorGroups as ISelector[], this);
+			return matchSelectors(selectorGroups as ISelector[], this, finder);
 		}
 		return matchSelector(selectorGroups, this);
 	}
