@@ -44,7 +44,7 @@ No
 
 Returns a boolean value indicating whether the removal was successful
 
-## Node.prototype.matches(selector: TSelector)
+## Node.prototype.matches(selector: TSelector[, finder: IParentNode])
 
 Verify whether the current node meets the specified judgment conditions
 
@@ -53,6 +53,9 @@ Verify whether the current node meets the specified judgment conditions
 Name | Type | Description | Required | Default
 ---- | ---- | ---- | ---- | ----
 selector | [TSelector](types.md#tselector) | Judgment conditions | √ | --
+finder | [IParentNode](types.md#iparentnode) | finder | × | --
+
+The finder is used when the selector starts with ">", indicating that the topmost element hit by the selector must be a child element of the finder
 
 ### Return value
 

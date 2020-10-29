@@ -42,4 +42,5 @@ test('real case', async () => {
 		attr: [],
 		pseudo: [],
 	})[0]);
+	expect(dom.querySelectorAll('rect, #Rectangle-7').length).toBe(1);
 });

@@ -216,11 +216,11 @@ export class ParentNode extends Node implements IParentNode {
 
 	querySelector(selector: TSelector): IParentNode | ITextNode | null {
 		const selectorGroups = typeof selector === 'string' ? parseSelector(selector) : selector;
-		return getNodesByCondition(node => node.matches(selectorGroups), this, true)[0];
+		return getNodesByCondition(node => node.matches(selectorGroups, this), this, true)[0];
 	}
 	
 	querySelectorAll(selector: TSelector): Array<IParentNode | ITextNode> {
 		const selectorGroups = typeof selector === 'string' ? parseSelector(selector) : selector;
-		return getNodesByCondition(node => node.matches(selectorGroups), this);
+		return getNodesByCondition(node => node.matches(selectorGroups, this), this);
 	}
 }

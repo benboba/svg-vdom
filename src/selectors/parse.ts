@@ -5,7 +5,7 @@ const tagChar = '(?:[a-zA-Z]+|\\*)';
 const selectorChar = `(?:${idChar}|${classChar}|${attrChar}|${pseudoChar})`;
 const combinatorChar = '(?:\\s*[>+~]\\s*|\\s+)';
 const selectorUnitReg = new RegExp(`^(${tagChar}?)(${selectorChar}*)(${combinatorChar}|$)`);
-const selectorGroupReg = new RegExp(`^((?:${tagChar}${selectorChar}*|${tagChar}?${selectorChar}+)(?:${combinatorChar}(?:${tagChar}${selectorChar}*|${tagChar}?${selectorChar}+))*)\\s*(?:,|$)`);
+const selectorGroupReg = new RegExp(`^(\\s*>\\s*)?((?:${tagChar}${selectorChar}*|${tagChar}?${selectorChar}+)(?:${combinatorChar}(?:${tagChar}${selectorChar}*|${tagChar}?${selectorChar}+))*)\\s*(?:,|$)`);
 
 const parseSelectorUnit = (selector: string): ISelector[] => {
 	const selectors: ISelector[] = [];
@@ -82,9 +82,9 @@ const parseSelectorUnit = (selector: string): ISelector[] => {
 			}
 		}
 		if (selectorExec[3]) {
-			const combinator = selectorExec[3].trim();
-			if (typeof selectorUnitCombinator[combinator as keyof typeof selectorUnitCombinator] === 'number') {
-				selectorUnit.combinator = selectorUnitCombinator[combinator as keyof typeof selectorUnitCombinator];
+			const combinator = selectorExec[3].trim() as keyof typeof selectorUnitCombinator;
+			if (typeof selectorUnitCombinator[combinator] === 'number') {
+				selectorUnit.combinator = selectorUnitCombinator[combinator];
 			}
 		}
 		selectors.push(selectorUnit);
@@ -100,7 +100,17 @@ export const parseSelector = (query: string) => {
 	let queryExec = selectorGroupReg.exec(queryStr);
 
 	while (queryExec) {
-		const selectors = parseSelectorUnit(queryExec[1]);
+		const selectors = parseSelectorUnit(queryExec[2]);
+		// 选择器允许以 > 开始
+		if (queryExec[1]) {
+			selectors.unshift({
+				combinator: selectorUnitCombinator['&>'],
+				id: [],
+				class: [],
+				attr: [],
+				pseudo: [],
+			});
+		}
 		groups.push(selectors);
 		queryStr = queryStr.slice(queryExec[0].length).trim();
 		if (!queryStr) {

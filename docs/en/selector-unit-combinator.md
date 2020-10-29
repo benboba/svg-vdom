@@ -9,3 +9,4 @@ Name | Value | Description
 \> | 1 | Child selector
 \+ | 2 | Neighbor sibling selector
 ~ | 3 | Sibling selector
+&\> | 4 | Child of finder
