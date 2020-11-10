@@ -41,8 +41,8 @@ test('节点', () => {
 	svg.remove();
 	expect(dom.childNodes.length).toBe(3);
 
-	expect(text.matches(NodeType.Tag)).toBeTruthy;
-	expect(text.matches(node => node.nodeName === '#text')).toBeTruthy;
+	expect(text.matches(NodeType.Tag)).toBeTruthy();
+	expect(text.matches(node => node.nodeName === '#text')).toBeTruthy();
 
 	const g = new ParentNode({
 		nodeName: 'g',
@@ -51,7 +51,7 @@ test('节点', () => {
 
 	svg.appendChild(g);
 	dom.appendChild(svg);
-	expect(g.matches('svg > g')).toBeTruthy;
+	expect(g.matches('svg > g')).toBeTruthy();
 	expect(g.closest('g')).toBe(g);
 	expect(g.closest(NodeType.Document)).toBe(dom);
 	expect(g.closest(NodeType.DocumentFragment)).toBeNull;

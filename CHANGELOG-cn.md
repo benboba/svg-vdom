@@ -1,3 +1,14 @@
+# 2020-11 v1.0.9
+
+## 功能
+
+- 现在 matchSelector 会验证 [structural pseudos](TODO：https://drafts.csswg.org/selectors-4/#structural-pseudos)
+- 为 ParentNode 类型增加了一个 children 的只读属性，用于获取子节点中所有的 TagNode
+
+## 修复问题
+
+- 修复了测试用例中的一些 bug
+
 # 2020-10-29 v1.0.8
 
 ## 功能

@@ -116,14 +116,15 @@ Container node type
 ```typescript
 interface IParentNode extends INode {
 	nodeType: NodeType.Tag | NodeType.Document | NodeType.DocumentFragment; // Node type
-	childNodes: INode[]; // Child node list
+	childNodes: INode[]; // list of child nodes
+	readonly children: ITagNode[]; // list of child tags
 
 	cloneNode(): IParentNode; // Create a copy of the current node(The child node and parent node will not be copied)
 
 	appendChild(childNode: INode | INode[]): boolean; // Insert child node at the end
 	insertBefore(childNode: INode | INode[], previousTarget: INode): boolean; // Insert before a child node
 	replaceChild(newChild: INode | INode[], oldChild: INode): INode | null; // Replace a child node
-	removeChild(childNode: INode | INode[]): boolean; // Remove a child node
+	removeChild(childNode: INode | INode[]): boolean; // Remove one or more child nodes
 
 	querySelector(selector: TSelector): IParentNode | ITextNode | null;
 	querySelectorAll(selector: TSelector): INode[];

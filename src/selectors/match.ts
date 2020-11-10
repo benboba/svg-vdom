@@ -2,6 +2,8 @@ import { INode, IParentNode, ITagNode } from '../../typings/node';
 import { ISelector } from '../../typings/style';
 import { NodeType } from '../node/node-type';
 import { attrModifier, selectorUnitCombinator, validPseudoElement } from './define';
+import { checkNTH, parseNTH } from './nth';
+import { parseSelector } from './parse';
 
 // 验证 className
 const checkClass = (node: INode, selector: ISelector): boolean => {
@@ -80,7 +82,8 @@ const checkAttr = (node: INode, selector: ISelector): boolean => {
 };
 
 // 验证伪类和伪元素
-// 所有伪类默认可以通过验证，伪元素必须在特定列表里
+// 部分伪类可以直接通过验证，部分伪类需要进一步验证，个别在特定列表里的伪元素需要符合条件才能通过验证
+// 目前支持到 CSS-selectors-3 https://www.w3.org/TR/selectors-3/
 const checkPseudo = (node: INode, selector: ISelector): boolean => {
 	if (node.nodeType !== NodeType.Tag) return false;
 	for (let pi = selector.pseudo.length; pi--;) {
@@ -98,7 +101,117 @@ const checkPseudo = (node: INode, selector: ISelector): boolean => {
 			if (!hasText) {
 				return false;
 			}
-		} else if (!pseudoSelector.isClass) {
+		} else if (pseudoSelector.isClass) {
+			switch (pseudoSelector.func) {
+				case 'empty': // 自身没有子标签
+					return (node as ITagNode).children.length === 0;
+
+				case 'first-child': // 自身是父元素的第一个子标签
+					if (node.parentNode) {
+						return node.parentNode.children[0] === node;
+					}
+					return false;
+
+				case 'last-child':
+					if (node.parentNode) {
+						const children = node.parentNode.children;
+						return children[children.length - 1] === node;
+					}
+					return false;
+
+				case 'only-child': // 自身是父元素唯一的子标签
+					if (node.parentNode) {
+						return node.parentNode.children.length === 1;
+					}
+					return false;
+
+				case 'nth-child': // 自身是父元素唯一的子标签
+					if (node.parentNode && pseudoSelector.value) {
+						const [a, b, ofS] = parseNTH(pseudoSelector.value);
+						let children = node.parentNode.children;
+						if (ofS) {
+							children = children.filter(c => c.matches(ofS));
+						}
+						return checkNTH(node as ITagNode, children, a, b);
+					}
+					return false;
+
+				case 'nth-last-child': // 自身是父元素唯一的子标签
+					if (node.parentNode && pseudoSelector.value) {
+						const [a, b, ofS] = parseNTH(pseudoSelector.value);
+						let children = node.parentNode.children.reverse();
+						if (ofS) {
+							children = children.filter(c => c.matches(ofS));
+						}
+						return checkNTH(node as ITagNode, children, a, b);
+					}
+					return false;
+
+				case 'first-of-type': // 自身是父元素第一个同类型子元素
+					if (node.parentNode) {
+						return node.parentNode.querySelectorAll(node.nodeName)[0] === node;
+					}
+					return false;
+
+				case 'last-of-type': // 自身是父元素最后一个同类型子元素
+					if (node.parentNode) {
+						const typeChildren = node.parentNode.querySelectorAll(node.nodeName);
+						return typeChildren[typeChildren.length - 1] === node;
+					}
+					return false;
+
+				case 'only-of-type': // 自身是父元素唯一的同类型子元素
+					if (node.parentNode) {
+						return node.parentNode.querySelectorAll(node.nodeName).length === 1;
+					}
+					return false;
+
+				case 'nth-of-type': // 自身是父元素唯一的子标签
+					if (node.parentNode && pseudoSelector.value) {
+						const [a, b, ofS] = parseNTH(pseudoSelector.value);
+						let typeChildren = node.parentNode.querySelectorAll(node.nodeName) as ITagNode[];
+						if (ofS) {
+							typeChildren = typeChildren.filter(c => c.matches(ofS));
+						}
+						return checkNTH(node as ITagNode, typeChildren, a, b);
+					}
+					return false;
+
+				case 'nth-last-of-type': // 自身是父元素唯一的子标签
+					if (node.parentNode && pseudoSelector.value) {
+						const [a, b, ofS] = parseNTH(pseudoSelector.value);
+						let typeChildren = (node.parentNode.querySelectorAll(node.nodeName) as ITagNode[]).reverse();
+						if (ofS) {
+							typeChildren = typeChildren.filter(c => c.matches(ofS));
+						}
+						return checkNTH(node as ITagNode, typeChildren, a, b);
+					}
+					return false;
+
+				case 'target': // 只有具备 id 或 name 属性的元素才可能被命中
+					return (node as ITagNode).hasAttribute('id') || (node as ITagNode).hasAttribute('name');
+
+				case 'not': // not 伪类需要反转规则，匹配不能命中 pseudoSelector.value 的元素，如果 pseudoSelector.value 解析失败，也返回 false
+					if (pseudoSelector.value) {
+						const selectors = parseSelector(pseudoSelector.value);
+						if (selectors.length) {
+							return !node.matches(selectors);
+						}
+					}
+					return false;
+
+				case 'lang': // 语言，命中系统语言或 lang="" 属性，因为不能判断系统语言，因此直接返回 true
+				case 'link': // CSS2 伪类，可命中任意元素
+				case 'visited': // CSS2 伪类，可命中任意元素
+				case 'hover': // CSS2 伪类，可命中任意元素
+				case 'active': // CSS2 伪类，可命中任意元素
+				case 'focus': // CSS2 伪类，可命中任意元素
+					return true;
+
+				default: // 其它伪类暂不进行验证，默认返回 false
+					return false;
+			}
+		} else {
 			return false;
 		}
 	}

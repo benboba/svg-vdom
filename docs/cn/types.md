@@ -117,6 +117,7 @@ interface INodeOption {
 interface IParentNode extends INode {
 	nodeType: NodeType.Tag | NodeType.Document | NodeType.DocumentFragment; // 节点类型
 	childNodes: INode[]; // 子节点列表
+	readonly children: ITagNode[]; // 子标签列表
 
 	cloneNode(): IParentNode; // 创建当前节点的副本（不会递归复制子节点）
 

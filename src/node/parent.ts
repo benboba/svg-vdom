@@ -1,5 +1,5 @@
 import { Node } from '.';
-import { IDocumentFragment, INode, IParentNode, IParentNodeOption, ITextNode, TSelector } from '../../typings/node';
+import { IDocumentFragment, INode, IParentNode, IParentNodeOption, ITextNode, TSelector, ITagNode } from '../../typings/node';
 import { parseSelector } from '../selectors/parse';
 import { getNodesByCondition } from '../utils/get-by-cond';
 import { updateFragment } from '../utils/update-fragment';
@@ -14,6 +14,16 @@ export class ParentNode extends Node implements IParentNode {
 
 	nodeType: IParentNode['nodeType'];
 	childNodes: IParentNode['childNodes'];
+
+	get children(): ITagNode[] {
+		const children: ITagNode[] = [];
+		for (const child of this.childNodes) {
+			if (child.nodeType === NodeType.Tag) {
+				children.push(child as ITagNode);
+			}
+		}
+		return children;
+	}
 
 	/**
 	 * 复制自身，但是不复制节点树关系链
