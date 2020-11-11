@@ -11,6 +11,7 @@
 ## Fixed bugs
 
 - Fixed some bugs in test cases
+- Fixed an error in the parsing of the :not pseudo-class
 
 # 2020-10-29 v1.0.8
 
