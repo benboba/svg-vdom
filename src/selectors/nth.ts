@@ -11,9 +11,13 @@ export const parseNTH = (type: string): [number, number, string] => {
 		a = 2;
 		b = 1;
 	} else {
-		const nth = /^([+-]?\d+)?n(?:\s*([+-])\s*([+-]?\d+))?$/i.exec(anb);
+		const nth = /^([+-]?\d*)n(?:\s*([+-])\s*([+-]?\d+))?$/i.exec(anb);
 		if (nth) {
-			a = +(nth[1] ?? 1);
+			if (/^[+-]?$/.test(nth[1])) { // 没有数字，则补1
+				a = +(`${nth[1]}1`);
+			} else {
+				a = +nth[1];
+			}
 			if (nth[2] && nth[3]) {
 				b = (nth[2] === '+' ? 1 : -1) * (+nth[3]);
 			}
@@ -36,7 +40,7 @@ export const checkNTH = (node: ITagNode, list: ITagNode[], a: number, b: number)
 			if (a === 0) {
 				return b === index;
 			} else {
-				return b <= index && b % -a === index % -a;
+				return index <= b && b % -a === index % -a;
 			}
 		}
 	} else {

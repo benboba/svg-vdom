@@ -1,3 +1,17 @@
+# 2020-11-11 v1.0.9
+
+## Features
+
+- Added a read-only attribute "children" to the ParentNode type to get all TagNodes in the child nodes
+- Now matchSelector will verify [structural pseudos](TODO：https://drafts.csswg.org/selectors-4/#structural-pseudos)
+- Now matchSelector will verify the :target pseudo-class (must contain id or name attributes)
+- Now matchSelector will verify the :not pseudo-class
+- Now matchSelector will pass the :lang, :link, :visited, :hover, :active, :focus pseudo-classes by default, and other pseudo-classes will be judged as a hit failure
+
+## Fixed bugs
+
+- Fixed some bugs in test cases
+
 # 2020-10-29 v1.0.8
 
 ## Features

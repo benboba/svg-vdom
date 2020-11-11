@@ -78,17 +78,33 @@ test('match selector', async () => {
 	expect(matchSelector(attrSelector, svg.childNodes[7])).toBeFalsy();
 	expect(matchSelector(attrSelector, svg.childNodes[8])).toBeFalsy();
 	expect(matchSelector(attrSelector, svg.childNodes[9])).toBeFalsy();
+
+	let pseudoSelector = parseSelector(':lang')[0][0];
+	expect(matchSelector(pseudoSelector, svg.childNodes[1])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.childNodes[3])).toBeTruthy();
+	pseudoSelector = parseSelector(':link')[0][0];
+	expect(matchSelector(pseudoSelector, svg.childNodes[1])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.childNodes[3])).toBeTruthy();
+	pseudoSelector = parseSelector(':visited')[0][0];
+	expect(matchSelector(pseudoSelector, svg.childNodes[1])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.childNodes[3])).toBeTruthy();
+	pseudoSelector = parseSelector(':active')[0][0];
+	expect(matchSelector(pseudoSelector, svg.childNodes[1])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.childNodes[3])).toBeTruthy();
+	pseudoSelector = parseSelector(':focus')[0][0];
+	expect(matchSelector(pseudoSelector, svg.childNodes[1])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.childNodes[3])).toBeTruthy();
 });
 
 test('match pseudo', async () => {
 	const dom = await parse(`<?xml version="1.0" encoding="UTF-8"?>
 	<svg>
 		<rect id="r1"/>
-		<rect id="r2"/>
-		<rect id="r3"/>
-		<rect id="r4"/>
-		<rect id="r5"/>
-		<rect id="r6"/>
+		<circle name="r2"/>
+		<rect/>
+		<rect/>
+		<rect/>
+		<circle id="r6"/>
 		<rect id="r7"/>
 	</svg>`);
 
@@ -123,15 +139,56 @@ test('match pseudo', async () => {
 	expect(matchSelector(pseudoSelector, svg.children[0])).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg.children[5])).toBeFalsy();
 
-	pseudoSelector = parseSelector(':nth-child(2n+1)')[0][0];
+	pseudoSelector = parseSelector(':first-of-type')[0][0];
 	expect(matchSelector(pseudoSelector, noParent)).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg)).toBeTruthy();
 	expect(matchSelector(pseudoSelector, svg.children[0])).toBeTruthy();
-	expect(matchSelector(pseudoSelector, svg.children[1])).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[1])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.children[4])).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[5])).toBeFalsy();
 
-	pseudoSelector = parseSelector(':nth-child(2n of rect)')[0][0];
+	pseudoSelector = parseSelector(':last-of-type')[0][0];
+	expect(matchSelector(pseudoSelector, noParent)).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg)).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.children[3])).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[4])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.children[5])).toBeTruthy();
+
+	pseudoSelector = parseSelector(':only-of-type')[0][0];
+	expect(matchSelector(pseudoSelector, noParent)).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg)).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.children[0])).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[5])).toBeFalsy();
+
+	pseudoSelector = parseSelector(':target')[0][0];
+	expect(matchSelector(pseudoSelector, noParent)).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg)).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[0])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.children[1])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.children[2])).toBeFalsy();
+
+	pseudoSelector = parseSelector(':not(rect)')[0][0];
+	expect(matchSelector(pseudoSelector, noParent)).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg)).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.children[0])).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[1])).toBeTruthy();
+
+	pseudoSelector = parseSelector(':not(:nth-of-type(1))')[0][0];
+	expect(matchSelector(pseudoSelector, noParent)).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg)).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[0])).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[1])).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[2])).toBeTruthy();
+
+	pseudoSelector = parseSelector(':not()')[0][0];
 	expect(matchSelector(pseudoSelector, noParent)).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg)).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg.children[0])).toBeFalsy();
-	expect(matchSelector(pseudoSelector, svg.children[1])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.children[1])).toBeFalsy();
+
+	pseudoSelector = parseSelector(':not(1)')[0][0];
+	expect(matchSelector(pseudoSelector, noParent)).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg)).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[0])).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[1])).toBeFalsy();
 });
