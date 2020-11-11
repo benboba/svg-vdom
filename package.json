@@ -1,6 +1,6 @@
 {
   "name": "svg-vdom",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "parse svg string and use it like dom",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

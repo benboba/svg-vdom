@@ -20,6 +20,10 @@ option | [IParentNodeOption](types.md#iparentnodeoption) | 配置项 | √ | --
 
 子节点列表
 
+## ParentNode.prototype.children
+
+子标签列表，只读
+
 ## ParentNode.prototype.cloneNode()
 
 创建当前节点的一个副本，但不会复制父节点和子节点列表

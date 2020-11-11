@@ -56,7 +56,7 @@ const parseSelectorUnit = (selector: string): ISelector[] => {
 					}
 					case ':': { // 伪类，伪元素
 						const isClass = specialExec[0][1] !== ':';
-						const pseudoStr = specialExec[0].replace(/^:+/, '');
+						const pseudoStr = specialExec[0].replace(/^:+/, '').trim();
 						const parenIndex: number = pseudoStr.indexOf('(');
 						if (parenIndex === -1) {
 							// 不是函数型伪类
@@ -66,8 +66,8 @@ const parseSelectorUnit = (selector: string): ISelector[] => {
 							});
 						} else {
 							selectorUnit.pseudo.push({
-								func: pseudoStr.slice(0, parenIndex),
-								value: pseudoStr.slice(parenIndex + 1, -1),
+								func: pseudoStr.slice(0, parenIndex).trim(),
+								value: pseudoStr.slice(parenIndex + 1, -1).trim(),
 								isClass,
 							});
 						}
