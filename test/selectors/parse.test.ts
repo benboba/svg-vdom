@@ -11,7 +11,7 @@ test('simple parse', () => {
 	const parseResult1 = parseSelector('*.a ~ #test.b.c.d[e^="test"] + [f] [f=g]:not(h) [f|=g]:hover [f$=g][f~=g][f*=g]::first-child');
 	expect(parseResult1.length).toBe(1);
 	expect(parseResult1[0].length).toBe(6);
-	expect(parseResult1[0][0].universal).toBeTruthy;
+	expect(parseResult1[0][0].universal).toBeTruthy();
 	expect(parseResult1[0][0].class[0]).toBe('a');
 	expect(parseResult1[0][0].combinator).toBe(selectorUnitCombinator['~']);
 	expect(parseResult1[0][1].id[0]).toBe('test');

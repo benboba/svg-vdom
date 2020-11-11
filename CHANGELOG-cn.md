@@ -1,3 +1,18 @@
+# 2020-11-11 v1.0.9
+
+## 功能
+
+- 为 ParentNode 类型增加了一个 children 的只读属性，用于获取子节点中所有的 TagNode
+- 现在 matchSelector 会验证 [structural pseudos](TODO：https://drafts.csswg.org/selectors-4/#structural-pseudos)
+- 现在 matchSelector 会验证 :target 伪类（必须包含 id 或 name 属性）
+- 现在 matchSelector 会验证 :not 伪类
+- 现在 matchSelector 会默认通过 :lang、:link、:visited、:hover、:active、:focus 伪类，其它伪类将判断为命中失败
+
+## 修复问题
+
+- 修复了测试用例中的一些 bug
+- 修复了 :not 伪类解析的一个错误
+
 # 2020-10-29 v1.0.8
 
 ## 功能

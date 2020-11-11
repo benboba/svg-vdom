@@ -18,7 +18,11 @@ Allowed values are NodeType.Tag | NodeType.Document | NodeType.DocumentFragment,
 
 ## ParentNode.prototype.childNodes
 
-Child node list
+List of child nodes
+
+## ParentNode.prototype.children
+
+List of child tags, read-only
 
 ## ParentNode.prototype.cloneNode()
 

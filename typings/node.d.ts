@@ -53,7 +53,7 @@ export interface INode {
 export interface IParentNode extends INode {
 	nodeType: NodeType.Tag | NodeType.Document | NodeType.DocumentFragment;
 	childNodes: INode[];
-
+	readonly children: ITagNode[];
 	cloneNode(): IParentNode;
 
 	appendChild(childNode: INode | INode[]): boolean;

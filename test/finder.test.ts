@@ -6,6 +6,7 @@ test('selector with finder', async () => {
     const ga = dom.querySelector('#a') as ITagNode;
     const rect = dom.querySelectorAll('rect');
     const sonRect = ga.querySelectorAll('>rect');
+    expect(rect.length).toBe(2);
     expect(sonRect.length).toBe(1);
-    expect(sonRect[0] === rect[1]).toBeTruthy;
+    expect(sonRect[0] === rect[0]).toBeTruthy();
 });

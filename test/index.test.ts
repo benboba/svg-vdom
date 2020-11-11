@@ -33,12 +33,12 @@ test('stringify', () => {
 	dom.appendChild(svg.cloneNode());
 	svg.setAttribute('width', '100');
 	svg.setAttribute('href', '1', 'xlink');
-	expect(svg.hasAttribute('xlink:href')).toBeTruthy;
-	expect(svg.hasAttribute('xml:href')).toBeFalsy;
-	expect(svg.hasAttribute('width')).toBeTruthy;
-	expect(svg.hasAttribute('height')).toBeFalsy;
+	expect(svg.hasAttribute('xlink:href')).toBeTruthy();
+	expect(svg.hasAttribute('xml:href')).toBeFalsy();
+	expect(svg.hasAttribute('width')).toBeTruthy();
+	expect(svg.hasAttribute('height')).toBeFalsy();
 	svg.setAttribute('height', '100');
-	expect(svg.hasAttribute('height')).toBeTruthy;
+	expect(svg.hasAttribute('height')).toBeTruthy();
 	svg.setAttribute('width', '200');
 	expect(svg.getAttribute('width')).toBe('200');
 	svg.removeAttribute('href', 'xlink');
@@ -72,6 +72,9 @@ test('stringify', () => {
 	svg.appendChild([comment, comment.cloneNode()]);
 	comment.textContent = '';
 	expect(stringifyTag(svg)).toBe('<svg width="200" height="100">abcdeangel<![CDATA[<ev il>]]><![CDATA[<ev il>]]><!--<just so so>--></svg>');
+
+	expect(dom.children[0].nodeName).toBe('svg');
+	expect(svg.children.length).toBe(0);
 
 	expect(stringifySVG()).toBe('');
 });
