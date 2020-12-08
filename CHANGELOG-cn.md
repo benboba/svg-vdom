@@ -1,9 +1,20 @@
+# 2020-12-08 v1.0.10
+
+## 功能
+
+- 现在 matchSelector 会判断 :root 伪类，规则是当前元素没有父元素，matchSelectors 会跳过包含 :root 伪类的最顶层选择器的验证（由于存在误判，原则上开发者最好尽量避免使用 :root 伪类）
+
+## 修复问题
+
+- 修复了 :nth-child 中 An+B 的解析错误
+- 修正了关于 [parse](docs/cn/parse.md) 的文档错误
+
 # 2020-11-11 v1.0.9
 
 ## 功能
 
 - 为 ParentNode 类型增加了一个 children 的只读属性，用于获取子节点中所有的 TagNode
-- 现在 matchSelector 会验证 [structural pseudos](TODO：https://drafts.csswg.org/selectors-4/#structural-pseudos)
+- 现在 matchSelector 会验证 [structural pseudos](https://drafts.csswg.org/selectors-4/#structural-pseudos)
 - 现在 matchSelector 会验证 :target 伪类（必须包含 id 或 name 属性）
 - 现在 matchSelector 会验证 :not 伪类
 - 现在 matchSelector 会默认通过 :lang、:link、:visited、:hover、:active、:focus 伪类，其它伪类将判断为命中失败

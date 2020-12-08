@@ -116,10 +116,17 @@ test('match pseudo', async () => {
 	expect(matchSelector(pseudoSelector, svg)).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg.children[0])).toBeTruthy();
 
-	pseudoSelector = parseSelector(':root')[0][0];
-	expect(matchSelector(pseudoSelector, svg)).toBeFalsy();
-	expect(matchSelector(pseudoSelector, svg.children[0])).toBeFalsy();
-	expect(matchSelector(pseudoSelector, svg.children[5])).toBeFalsy();
+	let pse = parseSelector(':root')[0];
+	expect(matchSelectors(pse, svg)).toBeTruthy();
+	expect(matchSelectors(pse, noParent)).toBeTruthy();
+	expect(matchSelectors(pse, svg.children[0])).toBeFalsy();
+	expect(matchSelectors(pse, svg.children[5])).toBeFalsy();
+
+	pse = parseSelector(':root rect')[0];
+	expect(matchSelectors(pse, svg)).toBeFalsy();
+	expect(matchSelectors(pse, noParent)).toBeTruthy();
+	expect(matchSelectors(pse, svg.children[0])).toBeTruthy();
+	expect(matchSelectors(pse, svg.children[5])).toBeFalsy();
 
 	pseudoSelector = parseSelector(':first-child')[0][0];
 	expect(matchSelector(pseudoSelector, noParent)).toBeFalsy();

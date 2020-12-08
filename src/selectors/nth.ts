@@ -11,17 +11,17 @@ export const parseNTH = (type: string): [number, number, string] => {
 		a = 2;
 		b = 1;
 	} else {
-		const nth = /^([+-]?\d*)n(?:\s*([+-])\s*([+-]?\d+))?$/i.exec(anb);
+		const nth = /^([+-]?\d*)n(?:\s*([+-])\s*(\d+))?$/i.exec(anb);
 		if (nth) {
 			if (/^[+-]?$/.test(nth[1])) { // 没有数字，则补1
-				a = +(`${nth[1]}1`);
+				a = +`${nth[1]}1`;
 			} else {
 				a = +nth[1];
 			}
 			if (nth[2] && nth[3]) {
 				b = (nth[2] === '+' ? 1 : -1) * (+nth[3]);
 			}
-		} else {
+		} else if (/^[+-]?\d+$/.test(anb)) {
 			b = +anb;
 		}
 	}

@@ -208,6 +208,9 @@ const checkPseudo = (node: INode, selector: ISelector): boolean => {
 				case 'focus': // CSS2 伪类，可命中任意元素
 					return true;
 
+				case 'root':
+					return !node.parentNode || node.parentNode.nodeType !== NodeType.Tag;
+
 				default: // 其它伪类暂不进行验证，默认返回 false
 					return false;
 			}
@@ -261,6 +264,10 @@ export const matchSelectors = (selectors: ISelector[], node: INode, finder?: IPa
 	let currentNode: INode = node;
 	let currentSelectorIndex = selectorsLength - 2;
 	while (currentSelectorIndex >= 0) {
+		// 如果最顶层选择器中包含 :root，则跳过验证
+		if (currentSelectorIndex === 0 && selectors[0].pseudo.findIndex(p => p.func === 'root') !== -1) {
+			break;
+		}
 		switch (selectors[currentSelectorIndex].combinator) {
 			// finder 的子元素
 			case selectorUnitCombinator['&>']:

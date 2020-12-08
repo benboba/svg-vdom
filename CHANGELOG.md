@@ -1,9 +1,20 @@
+# 2020-12-08 v1.0.10
+
+## Features
+
+- Now matchSelector will judge :root pseudo-class, the rule is that the current element has no parent element, matchSelectors will skip the verification of the topmost selector containing the :root pseudo-class (due to the misjudgment, in principle, developers should try to avoid using :root Pseudo-class)
+
+## Fixed bugs
+
+- Fixed the parsing error of An+B in :nth-child
+- Fixed documentation errors about [parse](docs/cn/parse.md)
+
 # 2020-11-11 v1.0.9
 
 ## Features
 
 - Added a read-only attribute "children" to the ParentNode type to get all TagNodes in the child nodes
-- Now matchSelector will verify [structural pseudos](TODO：https://drafts.csswg.org/selectors-4/#structural-pseudos)
+- Now matchSelector will verify [structural pseudos](https://drafts.csswg.org/selectors-4/#structural-pseudos)
 - Now matchSelector will verify the :target pseudo-class (must contain id or name attributes)
 - Now matchSelector will verify the :not pseudo-class
 - Now matchSelector will pass the :lang, :link, :visited, :hover, :active, :focus pseudo-classes by default, and other pseudo-classes will be judged as a hit failure
