@@ -7,7 +7,7 @@
 ## Fixed bugs
 
 - Fixed the parsing error of An+B in :nth-child
-- Fixed documentation errors about [parse](docs/cn/parse.md)
+- Fixed documentation errors about [parse](docs/en/parse.md)
 
 # 2020-11-11 v1.0.9
 
