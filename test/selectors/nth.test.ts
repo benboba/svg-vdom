@@ -22,7 +22,7 @@ test('match pseudo', async () => {
 	expect(matchSelector(pseudoSelector, svg.children[0])).toBeTruthy();
 	expect(matchSelector(pseudoSelector, svg.children[1])).toBeFalsy();
 
-	pseudoSelector = parseSelector(':nth-child(2n of rect)')[0][0];
+	pseudoSelector = parseSelector(':nth-child(+2n of rect)')[0][0];
 	expect(matchSelector(pseudoSelector, noParent)).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg)).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg.children[0])).toBeFalsy();
@@ -37,10 +37,10 @@ test('match pseudo', async () => {
 
 	pseudoSelector = parseSelector(':nth-child(-2n--3)')[0][0];
 	expect(matchSelector(pseudoSelector, noParent)).toBeFalsy();
-	expect(matchSelector(pseudoSelector, svg)).toBeTruthy();
-	expect(matchSelector(pseudoSelector, svg.children[0])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg)).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[0])).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg.children[1])).toBeFalsy();
-	expect(matchSelector(pseudoSelector, svg.children[2])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.children[2])).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg.children[3])).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg.children[4])).toBeFalsy();
 
@@ -76,7 +76,7 @@ test('match pseudo', async () => {
 	expect(matchSelector(pseudoSelector, svg.children[2])).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg.children[3])).toBeTruthy();
 
-    pseudoSelector = parseSelector(':nth-last-child(2n+1)')[0][0];
+    pseudoSelector = parseSelector(':nth-last-child(+2n+1)')[0][0];
 	expect(matchSelector(pseudoSelector, noParent)).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg)).toBeTruthy();
 	expect(matchSelector(pseudoSelector, svg.children[0])).toBeFalsy();
@@ -97,10 +97,10 @@ test('match pseudo', async () => {
 
 	pseudoSelector = parseSelector(':nth-last-child(-2n--3)')[0][0];
 	expect(matchSelector(pseudoSelector, noParent)).toBeFalsy();
-	expect(matchSelector(pseudoSelector, svg)).toBeTruthy();
-	expect(matchSelector(pseudoSelector, svg.children[5])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg)).toBeFalsy();
+	expect(matchSelector(pseudoSelector, svg.children[5])).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg.children[4])).toBeFalsy();
-	expect(matchSelector(pseudoSelector, svg.children[3])).toBeTruthy();
+	expect(matchSelector(pseudoSelector, svg.children[3])).toBeFalsy();
 	expect(matchSelector(pseudoSelector, svg.children[2])).toBeFalsy();
 
 	pseudoSelector = parseSelector(':nth-last-child(-n)')[0][0];

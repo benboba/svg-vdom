@@ -1,3 +1,14 @@
+# 2020-12-08 v1.0.10
+
+## Features
+
+- Now matchSelector will judge :root pseudo-class, the rule is that the current element has no parent element, matchSelectors will skip the verification of the topmost selector containing the :root pseudo-class (due to the misjudgment, in principle, developers should try to avoid using :root Pseudo-class)
+
+## Fixed bugs
+
+- Fixed the parsing error of An+B in :nth-child
+- Fixed documentation errors about [parse](docs/cn/parse.md)
+
 # 2020-11-11 v1.0.9
 
 ## Features
