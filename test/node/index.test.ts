@@ -54,5 +54,5 @@ test('节点', () => {
 	expect(g.matches('svg > g')).toBeTruthy();
 	expect(g.closest('g')).toBe(g);
 	expect(g.closest(NodeType.Document)).toBe(dom);
-	expect(g.closest(NodeType.DocumentFragment)).toBeNull;
+	expect(g.closest(NodeType.DocumentFragment)).toBeNull();
 });

@@ -12,7 +12,7 @@ test('标签', () => {
 	expect(svg.hasAttribute('href', 'xlink')).toBeTruthy();
 	expect(svg.hasAttribute('href', 'xml')).toBeFalsy();
 
-	expect(svg.getAttribute('xlink', 'href')).toBeNull;
+	expect(svg.getAttribute('xlink', 'href')).toBeNull();
 	expect(svg.getAttribute('href', 'xlink')).toBe('test');
 	svg.setAttribute('xlink:href', 'aaa');
 	expect(svg.getAttribute('xlink:href')).toBe('aaa');

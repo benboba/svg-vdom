@@ -158,6 +158,10 @@ export class ParentNode extends Node implements IParentNode {
 			if (oIndex !== -1) {
 				returnVal = replaceSize ? oldChild : null;
 				this.childNodes.splice(oIndex, replaceSize, ...children);
+				if (returnVal) {
+					// 清理旧节点的父节点指向
+					delete oldChild.parentNode;
+				}
 			} else {
 				this.childNodes.push(...children);
 			}
@@ -176,6 +180,8 @@ export class ParentNode extends Node implements IParentNode {
 			if (oIndex !== -1) {
 				returnVal = oldChild;
 				this.childNodes.splice(oIndex, 1, ...children);
+				// 清理旧节点的父节点指向
+				delete oldChild.parentNode;
 			} else {
 				this.childNodes.push(...children);
 			}
@@ -226,7 +232,7 @@ export class ParentNode extends Node implements IParentNode {
 
 	querySelector(selector: TSelector): IParentNode | ITextNode | null {
 		const selectorGroups = typeof selector === 'string' ? parseSelector(selector) : selector;
-		return getNodesByCondition(node => node.matches(selectorGroups, this), this, true)[0];
+		return getNodesByCondition(node => node.matches(selectorGroups, this), this, true)[0] ?? null;
 	}
 	
 	querySelectorAll(selector: TSelector): Array<IParentNode | ITextNode> {
