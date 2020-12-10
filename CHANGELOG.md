@@ -1,4 +1,11 @@
-# 2020-12-08 v1.0.10
+# 2020-12-10 v1.0.12
+
+## Fixed bugs
+
+- Fixed the bug that [ParentNode#querySelector](docs/en/parent-node.md#parentnodeprototypequeryselectorselector-tselector) should return null but return undefined when the object acquisition fails
+- Fixed [ParentNode#replaceChild](docs/en/parent-node.md#parentnodeprototypereplacechildnewchild-inode--inode-oldchild-inode) when inserting child nodes in batches, the bug pointed to by parentNode of old nodes was not removed
+
+# 2020-12-08 v1.0.10 & 1.0.11
 
 ## Features
 

@@ -14,7 +14,7 @@ test('real case', async () => {
 		</g>
 	</svg>`);
 	expect(dom.childNodes.length).toBe(2);
-	expect(dom.querySelector('a')).toBeNull;
+	expect(dom.querySelector('a')).toBeNull();
 	expect((dom.querySelector('title') as ITagNode).nodeName).toBe('title');
 	const g = dom.querySelectorAll('g') as ITagNode[];
 	expect(g.length).toBe(3);

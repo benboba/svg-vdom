@@ -1,4 +1,11 @@
-# 2020-12-08 v1.0.10
+# 2020-12-10 v1.0.12
+
+## 修复问题
+
+- 修复了 [ParentNode#querySelector](docs/cn/parent-node.md#parentnodeprototypequeryselectorselector-tselector) 在获取对象失败时应该返回 null 却返回了 undefined 的 bug
+- 修复了 [ParentNode#replaceChild](docs/cn/parent-node.md#parentnodeprototypereplacechildnewchild-inode--inode-oldchild-inode) 在批量插入子节点时，没有移除旧节点的 parentNode 指向的 bug
+
+# 2020-12-08 v1.0.10 & 1.0.11
 
 ## 功能
 
